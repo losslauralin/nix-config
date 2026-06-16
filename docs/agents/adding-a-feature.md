@@ -1,20 +1,22 @@
-# 新增 / 修改 Feature 切面指南
+# Adding / Modifying Feature Aspects Guide
 
-> 给 agent 的机械流程。先读 `CONTEXT.md` 和 `docs/frameworks/den.md`。
-> 上游语义以本地 `~/workspace/nix-ref/den/docs/src/content/docs/guides/configure-aspects.mdx`、`guides/mutual.mdx` 为准。
+> Mechanical flow for agents. Read `CONTEXT.md` and `docs/frameworks/den.md` first.
+> Upstream semantics authority: local `~/workspace/nix-ref/den/docs/src/content/docs/guides/configure-aspects.mdx`, `guides/mutual.mdx`.
+>
+> **See also**: `den-configuration-patterns.md` — practical patterns, validation checkpoints, error prevention quick reference.
 
-## 0. 先建立 Den 模型
+## 0. Establish Den Mental Model
 
-Den 不是传统 “host imports modules” 模型。
+Den is NOT traditional "host imports modules" model.
 
-- **Entity** 声明存在什么：host、user、home。
-- **Aspect** 声明 feature 做什么：一个 attrset，包含不同 Nix **Class** 的 owned configs。
-- **Owned config** 是 class 名下的普通 Nix module：`nixos`、`homeManager`、`darwin`、`user`、`wsl` 等。
-- **includes** 声明 aspect DAG 依赖，不是 Nix `imports`。
-- **provides** 声明命名子切面；特殊 `provides.to-users` / `to-hosts` 做跨 entity 交付。
-- **den.default** 自动应用到所有 entity，只放框架默认，不放业务 feature。
+- **Entity** declares what exists: host, user, home.
+- **Aspect** declares what it does: attrset containing different Nix **Class** owned configs.
+- **Owned config** is class-named ordinary Nix module: `nixos`, `homeManager`, `darwin`, `user`, `wsl`, etc.
+- **includes** declares aspect DAG dependencies, NOT Nix `imports`.
+- **provides** declares named sub-aspects; special `provides.to-users` / `to-hosts` do cross-entity delivery.
+- **den.default** auto-applies to all entities, only for framework defaults, NOT business features.
 
-示例：
+Example:
 
 ```nix
 {
@@ -25,27 +27,27 @@ Den 不是传统 “host imports modules” 模型。
 }
 ```
 
-这个 aspect 有两个 owned configs。host 直接接收 `nixos`；user 直接接收 `homeManager`；具体如何跨 entity 到达由 pipeline / `host-aspects` / `provides` 决定。
+This aspect has two owned configs. Host directly receives `nixos`; user directly receives `homeManager`; how they cross-entity arrives determined by pipeline / `host-aspects` / `provides`.
 
-## 1. 分清两种函数参数
+## 1. Distinguish Two Function Arg Types
 
-### Den context function（aspect/root 层）
+### Den context function (aspect/root level)
 
-用于按 context 激活。参数只能请求 Den pipeline 中存在的值，如 `host`、`user`、`home`、`class`、`aspect-chain`。
+For context-based activation. Args can only request values existing in Den pipeline: `host`, `user`, `home`, `class`, `aspect-chain`.
 
 ```nix
 lossilk.gaming._.min = {host, ...}: {
   nixos = {pkgs, ...}: {
-    # host 可在这里从外层闭包使用
+    # host accessible here from outer closure
   };
 };
 ```
 
-如果 root function 写了 `{pkgs, ...}:`，Den 会把 `pkgs` 当成 context arg，而不是 Nix module arg。多数 context 没有 `pkgs`，切面会不匹配或被跳过。
+If root function writes `{pkgs, ...}:`, Den treats `pkgs` as context arg, not Nix module arg. Most contexts lack `pkgs`, aspect won't match or gets skipped.
 
-### Nix module function（class block 内）
+### Nix module function (inside class block)
 
-用于 NixOS/Home Manager module args，必须带 `...`：
+For NixOS/Home Manager module args, must include `...`:
 
 ```nix
 lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
@@ -53,46 +55,46 @@ lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
 };
 ```
 
-## 2. 判断语义类型
+## 2. Determine Semantic Type
 
-| 需求 | 类型 | 做法 |
+| Need | Type | Action |
 |---|---|---|
-| 单 host 硬件/一次性配置 | Host spec | 写进 `modules/hosts/<host>/default.nix` 的 `nixos` block，不建 aspect |
-| 普通可复用功能 | Leaf Aspect | 新建/修改 `modules/<concern>/<name>.nix` |
-| 同一选择轴候选（shell/compositor） | Selection Variant | 子切面 include family root 和必要 battery |
-| 给 family/leaf 叠加能力 | Extension | 子切面，可单独 include |
-| 稳定组合/route table | Profile / Bundle | 通常只写 `includes`，不拥有 leaf 实现 |
-| 两个 concern 的 glue | Integration Edge | 只拥有接线配置，不拥有两端实现 |
-| 无自定义配置的小工具 | 聚合项 | 放入现有聚合（如 `cli/utils.nix`、`dev/extras.nix`） |
+| Single host hardware/one-off config | Host spec | Write into `modules/hosts/<host>/default.nix` `nixos` block, don't create aspect |
+| Normal reusable feature | Leaf Aspect | Create/modify `modules/<concern>/<name>.nix` |
+| Same selection axis candidates (shell/compositor) | Selection Variant | Sub-aspect includes family root + necessary battery |
+| Add capability to family/leaf | Extension | Sub-aspect, can be included independently |
+| Stable combination/route table | Profile / Bundle | Usually only writes `includes`, doesn't own leaf impl |
+| Glue between two concerns | Integration Edge | Only owns wiring config, not both endpoints' impl |
+| Small tool without custom config | Aggregate item | Put into existing aggregate (e.g. `cli/utils.nix`, `dev/extras.nix`) |
 
-先查 den batteries：如果上游已有 battery，优先 include battery。
+Check den batteries first: if upstream has battery, prefer including battery.
 
-## 3. 选路径与 aspect path
+## 3. Choose Path & Aspect Path
 
-按主要功能意图选 concern，不按 daemon/GUI/systemd 技术形状。
+Choose concern by primary function intent, NOT by daemon/GUI/systemd technical shape.
 
-| Concern | 路径 | Aspect path |
+| Concern | Path | Aspect path |
 |---|---|---|
 | CLI / shell / TUI | `modules/cli/` | `lossilk.cli._.*` |
-| 开发工具 / 编辑器 / 语言 / git | `modules/dev/` | `lossilk.dev._.*` |
-| 桌面会话 / compositor / shell / browser / terminal / appearance | `modules/desktop/` | `lossilk.desktop._.*` |
-| 网络 / SSH / VPN / 防火墙 | `modules/networking/` | `lossilk.networking._.*` |
+| Dev tools / editors / languages / git | `modules/dev/` | `lossilk.dev._.*` |
+| Desktop session / compositor / shell / browser / terminal / appearance | `modules/desktop/` | `lossilk.desktop._.*` |
+| Network / SSH / VPN / firewall | `modules/networking/` | `lossilk.networking._.*` |
 | OS substrate / boot / fs / power / peripherals | `modules/system/` | `lossilk.system._.*` |
-| 虚拟化 / 容器 / WSL | `modules/virt/` | `lossilk.virt._.*` |
-| 安全 / secrets / auth | `modules/security/` | `lossilk.security._.*` |
-| AI 工具 | `modules/ai/` | `lossilk.ai._.*` |
+| Virtualization / containers / WSL | `modules/virt/` | `lossilk.virt._.*` |
+| Security / secrets / auth | `modules/security/` | `lossilk.security._.*` |
+| AI tools | `modules/ai/` | `lossilk.ai._.*` |
 
-规则：
+Rules:
 
-- 新文件用 attrpath 风格：`{lossilk, ...}:` + `lossilk.x._.y`。
-- 不在新文件使用 `<lossilk/...>`，尖括号只保留既有文件风格。
-- 文件路径和 aspect path 必须落在同一主要 concern。
-- 不创建空 namespace root；root 只有在拥有共享行为或 Profile / Bundle 时存在。
-- include 父切面不会自动启用 children；需要子项就显式 include。
+- New files use attrpath style: `{lossilk, ...}:` + `lossilk.x._.y`.
+- Don't use `<lossilk/...>` in new files, angle brackets only preserved in existing files.
+- File path and aspect path must fall in same primary concern.
+- Don't create empty namespace roots; root only exists when owning shared behavior or Profile / Bundle.
+- Including parent aspect doesn't auto-enable children; explicitly include when needing children.
 
-## 4. 写 owned configs
+## 4. Write Owned Configs
 
-### T1: 单 class leaf
+### T1: Single-class leaf
 
 ```nix
 # modules/cli/example.nix
@@ -104,7 +106,7 @@ lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
 }
 ```
 
-### T2: 多 class feature
+### T2: Multi-class feature
 
 ```nix
 # modules/desktop/apps/example.nix
@@ -122,7 +124,7 @@ lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
 ### T3: Parametric aspect
 
 ```nix
-# 只有 user context 存在时激活
+# Only activates when user context exists
 {
   lossilk.ai._.example = {user}: {
     nixos = _: {
@@ -132,7 +134,7 @@ lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
 }
 ```
 
-不要把 `pkgs`、`config`、`lib` 放到 aspect root function；它们属于 class module。
+Don't put `pkgs`, `config`, `lib` in aspect root function; they belong to class modules.
 
 ### T4: Selection Variant
 
@@ -168,54 +170,54 @@ lossilk.cli._.tool.homeManager = {pkgs, lib, ...}: {
 }
 ```
 
-Profile / Bundle 只拥有稳定选择，不拥有 unrelated leaf 实现。
+Profile / Bundle only owns stable choices, NOT unrelated leaf implementation.
 
-## 5. 决定接线位置
+## 5. Decide Wiring Location
 
-| 场景 | 接线 |
+| Scenario | Wiring |
 |---|---|
-| 用户自己的通用环境（shell/dev/AI/dotfiles） | `modules/users/loss.nix` 的 `den.aspects.loss.includes` |
-| Host 选择系统/桌面 profile | `modules/hosts/<host>/default.nix` 或 profile 的 `includes` |
-| Feature 内部依赖 | feature 自己的 `includes` |
-| Host 给所有/某些 users 发 companion config | `provides.to-users` / `provides.<user>` |
-| User 给其 host 发补丁 | `provides.to-hosts` / `provides.<host>`，只用于用户特异性 host 补丁 |
-| Primary user 接收 host aspect tree 中的 user classes | user include `den.batteries.host-aspects` |
+| User's own general environment (shell/dev/AI/dotfiles) | `modules/users/loss.nix` `den.aspects.loss.includes` |
+| Host selects system/desktop profile | `modules/hosts/<host>/default.nix` or profile's `includes` |
+| Feature internal dependencies | feature's own `includes` |
+| Host delivers companion config to all/some users | `provides.to-users` / `provides.<user>` |
+| User delivers patches to its host | `provides.to-hosts` / `provides.<host>`, only for user-specific host patches |
+| Primary user receives user classes from host aspect tree | user includes `den.batteries.host-aspects` |
 
 ### Cross-entity rules
 
-- `loss.includes` 不依赖 `host-aspects`。它由内建 `host-to-users` policy 在 `{host, user}` context 下解析。
-- `host-aspects` 表示 user opt-in 接收所在 host aspect tree 的 `homeManager`/`hjem` 等 user classes。
-- 多用户或条件复杂时，优先显式 `provides.to-users` / `provides.<user>`。
-- `provides.to-hosts` 只用于用户专属 host 补丁；不要写通用主机配置。
+- `loss.includes` doesn't depend on `host-aspects`. It's resolved by built-in `host-to-users` policy in `{host, user}` context.
+- `host-aspects` means user opts-in to receive `homeManager`/`hjem` etc user classes from host aspect tree.
+- For multi-user or complex conditions, prefer explicit `provides.to-users` / `provides.<user>`.
+- `provides.to-hosts` only for user-specific host patches; don't write general host config.
 
-## 6. 新文件必须 git add
+## 6. New Files Must be git-added
 
-`vic/import-tree` 只扫描 git-tracked Nix 文件。新增 `modules/**/*.nix` 后立刻：
+`vic/import-tree` only scans git-tracked Nix files. After adding `modules/**/*.nix` immediately:
 
 ```bash
 git add modules/<path>.nix
 ```
 
-不 add，文件不参与 evaluation，`just check` 也可能仍然绿。
+Without add, file not evaluated, `just check` may still pass.
 
-## 7. 验证
+## 7. Validation
 
-必须通过仓库 just 包装：
+Must use repo just wrappers:
 
 ```bash
 just fmt
 just check
 ```
 
-Host/desktop 改动再跑：
+For host/desktop changes also run:
 
 ```bash
 just build-vm nixos-niri-dms-vm
 ```
 
-还要做 targeted eval / repl。`just check` 只证明能求值，不证明行为在最终配置里。
+Also do targeted eval / repl. `just check` only proves evaluable, NOT proves behavior in final config.
 
-示例：
+Example:
 
 ```bash
 printf '%s\n' \
@@ -223,25 +225,25 @@ printf '%s\n' \
   ':q' | just repl
 ```
 
-## 常见错误
+## Common Errors
 
-| 症状 | 原因 | 修复 |
+| Symptom | Cause | Fix |
 |---|---|---|
-| 新文件完全不生效，check 仍绿 | 没 `git add` | `git add` 后重跑 |
-| `undefined variable 'lossilk'` | 文件参数没声明 | `{lossilk, ...}:` |
-| `undefined variable '__findFile'` | 新文件用了尖括号 | 改 attrpath 风格 |
-| `function called with unexpected argument` | class module 参数没 `...` | `{pkgs, ...}:` |
-| aspect 被跳过 | root function 请求了当前 context 没有的参数 | 检查 `{host}` / `{host, user}` / `{user}` |
-| user includes 不生效 | 误以为靠 host-aspects，或没接到 user aspect | 检查 `den.aspects.loss.includes` 和 host user entity 声明 |
-| host-selected HM companion 不到 user | user 没 opt-in `den.batteries.host-aspects`，或需显式 provides | 在 user includes 加 host-aspects，或写 `provides.to-users` |
-| include 父切面后子项没生效 | 子切面不会自动 emit | 显式 include 子切面或建 meta-aspect |
+| New file has no effect, check still passes | Not `git add`ed | `git add` then re-run |
+| `undefined variable 'lossilk'` | File args not declared | `{lossilk, ...}:` |
+| `undefined variable '__findFile'` | New file used angle brackets | Change to attrpath style |
+| `function called with unexpected argument` | class module args missing `...` | `{pkgs, ...}:` |
+| Aspect skipped | root function requests arg current context lacks | Check `{host}` / `{host, user}` / `{user}` |
+| user includes not working | Mistakenly thinks depends on host-aspects, or not wired to user aspect | Check `den.aspects.loss.includes` and host user entity declaration |
+| Host-selected HM companion doesn't reach user | User didn't opt-in `den.batteries.host-aspects`, or needs explicit provides | Add host-aspects to user includes, or write `provides.to-users` |
+| After including parent aspect, children don't work | Children not auto-emitted | Explicitly include children or build meta-aspect |
 
-## 红线
+## Red Lines
 
-修改前必须问用户：
+Must ask user before modifying:
 
 - `flake.nix`
 - `flake.lock`
 - `pkgs/*`
 
-不要提交，除非用户明确要求。
+Don't commit unless user explicitly requests.

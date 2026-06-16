@@ -6,16 +6,16 @@
 # breaks virtio-vga-gl GL passthrough — see modules/system/vm.nix).
 #
 # Workflow:
-#   sudo nix build .#nixosConfigurations.<host>.config.system.build.vm
-#   scripts/run-vm-arch.sh [<host>]                   # default host: nixos-niri-vm
-#   DISPLAY_FALLBACK=1 scripts/run-vm-arch.sh         # software rendering fallback
-#   scripts/run-vm-arch.sh <host> -snapshot           # extra qemu args passed through
+#   just build-vm <host>                                # builds to /tmp/result-<host>
+#   just run-vm <host>                                  # boot with qcow2 in /tmp/<host>.qcow2
+#   DISPLAY_FALLBACK=1 just run-vm <host>               # software rendering fallback
+#   just run-vm <host> -snapshot                        # extra qemu args passed through
 #
 # Multi-host smoke test (Noctalia vs DMS):
-#   sudo nix build .#nixosConfigurations.nixos-niri-vm.config.system.build.vm -o result
-#   scripts/run-vm-arch.sh nixos-niri-vm
-#   sudo nix build .#nixosConfigurations.nixos-niri-dms-vm.config.system.build.vm -o result-dms
-#   RESULT="$PWD/result-dms" scripts/run-vm-arch.sh nixos-niri-dms-vm
+#   just build-vm nixos-niri-vm
+#   just run-vm nixos-niri-vm
+#   just build-vm nixos-niri-dms-vm
+#   just run-vm nixos-niri-dms-vm
 #
 # Diagnostics:
 #   - Serial console output streams to the launching terminal (vm.nix wires
@@ -30,7 +30,7 @@ HOST="${1:-nixos-niri-vm}"
 # Strip the host arg from $@ so remaining args pass through to qemu
 if [[ $# -ge 1 ]]; then shift; fi
 
-RESULT="${RESULT:-$REPO/result}"
+RESULT="${RESULT:-/tmp/result-${HOST}}"
 RUNNER="$RESULT/bin/run-${HOST}-vm"
 
 if [[ ! -x $RUNNER ]]; then
@@ -66,7 +66,11 @@ if [[ ${DISPLAY_FALLBACK:-0} == "1" ]]; then
   echo "[run-vm-arch] DISPLAY_FALLBACK=1: forcing software rendering (-vga std, gl=off)" >&2
 fi
 
+# Default qcow2 to /tmp instead of CWD (nix-generated runner uses ./<host>.qcow2)
+export NIX_DISK_IMAGE="${NIX_DISK_IMAGE:-/tmp/${HOST}.qcow2}"
+
 echo "[run-vm-arch] using $(grep -oE '/usr/bin/qemu-system-x86_64' "$WORK/run.sh" | head -1)" >&2
+echo "[run-vm-arch] disk image: $NIX_DISK_IMAGE" >&2
 echo "[run-vm-arch] serial console: this terminal (kernel console=ttyS0 + -serial mon:stdio)" >&2
 echo "[run-vm-arch] ssh once up: ssh -p 2222 loss@localhost" >&2
 

@@ -48,10 +48,13 @@
         backupRetention = 5;
       };
 
-      home.sessionVariables = {
-        # 读取系统级安全解密出来的密钥（由 systemd 处理，权限归当前用户所有）
-        PI_WEBDAV_PASSWORD = "$(cat /run/secrets/pi_webdav_password)";
-      };
+      # PI_WEBDAV_PASSWORD 走 fish conf.d 按文件存在才设，不用 home.sessionVariables。
+      # home.sessionVariables 会无条件设空字符串，覆盖用户手动 set -gx 的值。
+      home.file.".config/fish/conf.d/pi-webdav.fish".text = ''
+        if test -f /run/secrets/pi_webdav_password
+          set -gx PI_WEBDAV_PASSWORD (cat /run/secrets/pi_webdav_password)
+        end
+      '';
     };
   };
 }

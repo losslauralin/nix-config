@@ -15,9 +15,9 @@ switch *args:
 build *args:
     nh os build {{ args }}
 
-# nix build <host>'s VM image to ./result-<host>/  (e.g. just build-vm nixos-niri-dms-vm)
+# nix build <host>'s VM image to /tmp/result-<host>/  (e.g. just build-vm nixos-niri-dms-vm)
 build-vm host *args:
-    nix build .#nixosConfigurations.{{ host }}.config.system.build.vm -o result-{{ host }} {{ args }}
+    nix build .#nixosConfigurations.{{ host }}.config.system.build.vm -o /tmp/result-{{ host }} {{ args }}
 
 # nix flake check [args]
 check *args:
@@ -30,9 +30,9 @@ test-vm host: (build-vm host) (run-vm host)
 fmt *args:
     nix fmt {{ args }}
 
-# boot ./result-<host>/bin/run-<host>-vm (Arch: 用 host qemu 替代 nix-store qemu)
+# boot /tmp/result-<host>/bin/run-<host>-vm (Arch: 用 host qemu 替代 nix-store qemu)
 run-vm host:
-    RESULT="$PWD/result-{{ host }}" scripts/run-vm-arch.sh {{ host }}
+    RESULT=/tmp/result-{{ host }} scripts/run-vm-arch.sh {{ host }}
 
 # nix flake update [args]
 update *args:

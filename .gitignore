@@ -1,0 +1,36 @@
+.private_env.sh
+**/private/env
+**/.config/private/
+
+**/.config/nix-private/
+
+.env.local
+.env.private
+**/.secrets/
+.serena/memories/serena_tool_compatibility_nix.md
+.serena/
+.claude/settings.local.json
+.claude/memory/
+.claude/plans/
+.cunzhi-memory/
+.spec-workflow/
+.trellis/
+
+# Reference repositories (auto-managed)
+.ref/
+!.ref/README.md
+!.ref/*.example.sh
+
+# Personal notes (not shared)
+notes/
+nixos-niri-dms-vm.qcow2
+nixos-niri-vm.qcow2
+result
+result-dms
+result-nixos-niri-dms-vm
+result-hm-gen
+secrets/vm-key.txt
+
+# Pix Agent
+.ai/
+.pi-lens/

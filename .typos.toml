@@ -1,0 +1,5 @@
+# .typos.toml
+# Typos 拼写检查配置
+
+[default]
+extend-words = { facter = "facter" }

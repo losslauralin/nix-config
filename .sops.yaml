@@ -1,0 +1,15 @@
+keys:
+  # 上 NixOS 后替换为你的 host key:
+  #   ssh-to-age < /etc/ssh/ssh_host_ed25519_key.pub
+  # 然后 sops updatekeys secrets/secrets.yaml
+  - &placeholder age16jjsg4vwwztqvc37tyg5kqp4ptqy9x3wl3g2rd7nmyrlnmmzhg8sp693vx
+  # 你的个人 age key (用于在任意机器上编辑 secrets):
+  #   mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt
+  #   age-keygen -y ~/.config/sops/age/keys.txt
+  # - &loss age1xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+creation_rules:
+  - path_regex: secrets/[^/]+\.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+          - *placeholder
+          # - *loss

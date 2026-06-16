@@ -1,0 +1,70 @@
+# modules/hosts/mechrevo-nixos-dms-niri/default.nix
+#
+# Host: mechrevo-nixos-dms-niri —— 真机 (MECHREVO 笔记本), niri + DankMaterialShell desktop.
+# 以 nixos-niri-dms-vm 为模板, 把 virt._.vm 占位换成真实硬件:
+#   - ./_disko.nix          声明式分区 (Btrfs-on-LUKS)
+#   - ./facter.json         硬件探测报告 (真机 sudo nixos-facter 生成)
+#   - nixos-hardware.*       机型通用调优
+# Windows NTFS 数据盘 (nvme1n1) 只用 udisks2 按需挂, 不进 disko.
+# 实体声明在 modules/den.nix
+{
+  inputs,
+  lossilk,
+  ...
+}: {
+  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri.displays.eDP-1 = {
+    primary = true;
+    refresh = 240.0;
+    width = 2560;
+    height = 1600;
+  };
+
+  den.aspects.mechrevo-nixos-dms-niri = {
+    # 共享 niri + DMS desktop Profile / Bundle；本文件只追加真机 host spec。
+    includes = with lossilk; [
+      desktop._.niri-dms-desktop
+      system._.boot._.plymouth # 图形启动画面 / quiet boot
+      system._.filesystems._.ntfs # Windows 数据盘按需挂载支持
+    ];
+
+    nixos = _: {
+      imports = [
+        ./_disko.nix # 磁盘布局 (本目录单独文件; import-tree 按 /_ 忽略, 只经此 imports 引入)
+        inputs.disko.nixosModules.disko
+        inputs.nixos-facter-modules.nixosModules.facter
+        inputs.nixos-hardware.nixosModules.common-cpu-intel # microcode + kvm-intel + vaapi
+        inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime # videoDrivers=["nvidia"]; 单卡无 iGPU 用 nonprime (common-gpu-nvidia=prime 变体要 busId)
+        inputs.nixos-hardware.nixosModules.common-pc-laptop # 电源/acpi
+        inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd # fstrim
+      ];
+
+      # facter 硬件报告: availableKernelModules / microcode / Motorcomm dwmac 网卡等自动设
+      hardware.facter.reportPath = ./facter.json;
+
+      # 单卡 NVIDIA RTX 4060 (Ada); facter 探测到卡但不启用驱动, 故手写:
+      # (闭源放行: den.default 里 nixpkgs.config.allowUnfree = true, 项目级, 不在本文件)
+      hardware.graphics.enable = true;
+      hardware.nvidia = {
+        modesetting.enable = true;
+        open = true; # Ada 用 open 内核模块
+      };
+
+      boot.loader.systemd-boot.enable = true;
+      boot.loader.efi.canTouchEfiVariables = true;
+      zramSwap.enable = true;
+
+      # Windows NTFS 数据盘 (nvme1n1p1): 只挂载, 不分区/格式化 → 不进 disko, udisks2 按需挂.
+      # 真机: 文件管理器点击, 或 udisksctl mount -b /dev/disk/by-uuid/CEEB00109B98B771 (label 数据).
+      services.udisks2.enable = true;
+
+      services.fwupd.enable = true; # 固件更新 (真机)
+
+      nixpkgs.hostPlatform = "x86_64-linux";
+      # greetd 自动登录 loss 启 niri-session (command 在 desktop._.compositor._.niri.nixos 里设)
+      services.greetd.settings.default_session.user = "loss";
+    };
+
+    # user class 路由到 users.users.loss.extraGroups
+    user.extraGroups = ["video" "input"];
+  };
+}

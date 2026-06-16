@@ -1,0 +1,19 @@
+# CI 守门:与 docs/agents/adding-a-feature.md Step 6 对应 —— 格式 + flake 求值必须绿。
+# 只做 eval 级检查,不构建 host closure、不产出 artifact、不部署(NixOS 配置无 release 流程;
+# VM 构建留给本地 just build-vm,部署走 host 端 just switch)。
+# 统一走 justfile 入口(nix run nixpkgs#just),与本地验证流程同一套命令。
+name: check
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+jobs:
+  flake-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - name: Format check (treefmt)
+        run: nix run nixpkgs#just -- fmt-check
+      - name: Flake check
+        run: nix run nixpkgs#just -- check

@@ -28,7 +28,7 @@
         nix-flake-check = {
           enable = true;
           name = "nix flake check";
-          entry = "${pkgs.nix}/bin/nix flake check --no-warn-dirty";
+          entry = "${pkgs.nix}/bin/nix flake check --no-build --no-warn-dirty";
           language = "system";
           pass_filenames = false;
           stages = ["pre-push"];

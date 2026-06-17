@@ -5,17 +5,17 @@ PARENT_ROOT="${PI_SIDE_PARENT_REPO:-${1:-}}"
 AGENT_ID="${PI_SIDE_AGENT_ID:-${2:-unknown}}"
 MAIN_BRANCH="main"
 BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-if [[ "$BRANCH" == "HEAD" ]]; then
+if [[ $BRANCH == "HEAD" ]]; then
   BRANCH=""
 fi
 
-if [[ -z "$PARENT_ROOT" ]]; then
+if [[ -z $PARENT_ROOT ]]; then
   echo "[side-agent-finish] Missing parent checkout path."
   echo "Usage: PI_SIDE_PARENT_REPO=/path/to/parent .agents/hooks/side-agent-finish.sh"
   exit 1
 fi
 
-if [[ -z "$BRANCH" ]]; then
+if [[ -z $BRANCH ]]; then
   echo "[side-agent-finish] Could not determine current branch."
   exit 1
 fi
@@ -35,23 +35,26 @@ acquire_lock() {
   payload="{\"agentId\":\"$AGENT_ID\",\"pid\":$$,\"acquiredAt\":\"$(iso_now)\"}"
   started=$(date +%s)
   while true; do
-    if ( set -o noclobber; printf '%s\n' "$payload" > "$LOCK_FILE" ) 2>/dev/null; then
+    if (
+      set -o noclobber
+      printf '%s\n' "$payload" >"$LOCK_FILE"
+    ) 2>/dev/null; then
       return 0
     fi
-    elapsed=$(( $(date +%s) - started ))
+    elapsed=$(($(date +%s) - started))
 
     # Check if the lock holder is still alive (stale lock after crash/reboot)
-    if [[ -f "$LOCK_FILE" ]]; then
+    if [[ -f $LOCK_FILE ]]; then
       local holder_pid
       holder_pid="$(grep -o '"pid":[0-9]*' "$LOCK_FILE" 2>/dev/null | head -n 1 | grep -o '[0-9]*' || true)"
-      if [[ -n "$holder_pid" ]] && ! kill -0 "$holder_pid" 2>/dev/null; then
+      if [[ -n $holder_pid ]] && ! kill -0 "$holder_pid" 2>/dev/null; then
         echo "[side-agent-finish] Removing stale merge lock (pid $holder_pid no longer running)."
         rm -f "$LOCK_FILE"
         continue
       fi
     fi
 
-    if [[ "$elapsed" -ge "$MERGE_LOCK_TIMEOUT" ]]; then
+    if [[ $elapsed -ge $MERGE_LOCK_TIMEOUT ]]; then
       echo "[side-agent-finish] Timed out after ${MERGE_LOCK_TIMEOUT}s waiting for merge lock."
       echo "[side-agent-finish] Stale lock? Inspect: $LOCK_FILE"
       exit 3
@@ -88,7 +91,7 @@ while true; do
 
   release_lock
 
-  if [[ "$merge_status" -eq 0 ]]; then
+  if [[ $merge_status -eq 0 ]]; then
     echo "[side-agent-finish] Success: fast-forwarded $MAIN_BRANCH to include $BRANCH in parent checkout."
     rm -f "$(pwd)/.pi/active.lock" || true
     exit 0

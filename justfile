@@ -45,16 +45,18 @@ check *args:
     nix flake check --log-format internal-json -v {{ args }} |& nom --json
 
 # nix build wrapped with nom progress (NO_NOM=1 or non-tty disables).
+# Defaults to --no-link so exploratory builds don't drop a `result` symlink
+# into the cwd. Pass your own -o/--out-link to override.
 # Example: just nb .#nixosConfigurations.nixos-wsl.config.system.build.toplevel
 nb *args:
     #!/usr/bin/env bash
     set -euo pipefail
     if [ -n "${NO_NOM:-}" ] || [ ! -t 1 ]; then
-      exec nix build {{ args }}
+      exec nix build --no-link {{ args }}
     fi
     nom_out=$(nix build --no-link --print-out-paths nixpkgs#nix-output-monitor)
     export PATH="$nom_out/bin:$PATH"
-    nix build --log-format internal-json -v {{ args }} |& nom --json
+    nix build --no-link --log-format internal-json -v {{ args }} |& nom --json
 
 # build-vm <host> 后 boot
 test-vm host: (build-vm host) (run-vm host)

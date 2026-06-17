@@ -8,10 +8,12 @@ help:
     just -l
 
 # nh os switch [args]  (e.g. just switch, just switch .#nixos-wsl, just switch .#nixos-wsl --ask)
+# nh uses nix-output-monitor by default; pass --no-nom to disable.
 switch *args:
     nh os switch {{ args }}
 
 # nh os build [args]
+# nh uses nix-output-monitor by default; pass --no-nom to disable.
 build *args:
     nh os build {{ args }}
 
@@ -19,9 +21,27 @@ build *args:
 build-vm host *args:
     nix build .#nixosConfigurations.{{ host }}.config.system.build.vm -o /tmp/result-{{ host }} {{ args }}
 
-# nix flake check [args]
+# nix flake check — runs through nom by default for nicer build progress.
+# Set NO_NOM=1 to fall back to plain output (CI / non-tty).
 check *args:
-    nix flake check {{ args }}
+    set -o pipefail; \
+    if [ -n "${NO_NOM:-}" ]; then \
+      nix flake check {{ args }}; \
+    else \
+      nix flake check --log-format internal-json -v {{ args }} \
+        |& nix run nixpkgs#nix-output-monitor; \
+    fi
+
+# nix build wrapped with nom progress (NO_NOM=1 to disable).
+# Example: just nb .#nixosConfigurations.nixos-wsl.config.system.build.toplevel
+nb *args:
+    set -o pipefail; \
+    if [ -n "${NO_NOM:-}" ]; then \
+      nix build {{ args }}; \
+    else \
+      nix build --log-format internal-json -v {{ args }} \
+        |& nix run nixpkgs#nix-output-monitor; \
+    fi
 
 # build-vm <host> 后 boot
 test-vm host: (build-vm host) (run-vm host)
@@ -54,6 +74,40 @@ fmt-check:
 
 # Run all checks: formatting + flake check
 check-all: fmt-check check
+
+# ─── Change-impact tools ──────────────────────────────────────────────────
+# Build <host>'s system and diff against the currently running system.
+# Useful before `just switch` to preview package/version changes.
+# Example: just diff nixos-wsl
+diff host *args:
+    @echo "Building .#nixosConfigurations.{{ host }}.config.system.build.toplevel ..."
+    nix build .#nixosConfigurations.{{ host }}.config.system.build.toplevel \
+      --out-link /tmp/result-diff-{{ host }} {{ args }}
+    nix run nixpkgs#nvd -- diff /run/current-system /tmp/result-diff-{{ host }}
+
+# Diff <host>'s system between a git ref and the current working tree.
+# Useful for "what did I change since <ref>".
+# Example: just diff-revs nixos-wsl HEAD~5
+diff-revs host ref:
+    nix build .#nixosConfigurations.{{ host }}.config.system.build.toplevel \
+      --out-link /tmp/result-{{ host }}-now
+    nix build "git+file://$PWD?rev=$(git rev-parse {{ ref }})#nixosConfigurations.{{ host }}.config.system.build.toplevel" \
+      --out-link /tmp/result-{{ host }}-base
+    nix run nixpkgs#nvd -- diff /tmp/result-{{ host }}-base /tmp/result-{{ host }}-now
+
+# Why does <host>'s system depend on <attr>? <attr> is any installable or store path.
+# Example: just why nixos-wsl /nix/store/...-firefox-...
+why host attr:
+    nix why-depends .#nixosConfigurations.{{ host }}.config.system.build.toplevel {{ attr }}
+
+# Top 20 contributors to <host>'s system closure size.
+closure host:
+    nix path-info -rsSh .#nixosConfigurations.{{ host }}.config.system.build.toplevel \
+      | sort -hk2 | tail -20
+
+# Interactive dependency-tree explorer for <host>'s system closure.
+tree host:
+    nix run nixpkgs#nix-tree -- .#nixosConfigurations.{{ host }}.config.system.build.toplevel
 
 # Interactive nix repl with this flake loaded
 repl *args:

@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PARENT_ROOT="${1:-}"
+export PARENT_ROOT="${1:-}"
 WORKTREE="${2:-$(pwd)}"
 AGENT_ID="${3:-unknown}"
 MAIN_BRANCH="main"
 
 BRANCH="$(git -C "$WORKTREE" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
-if [[ "$BRANCH" == "HEAD" ]]; then
+if [[ $BRANCH == "HEAD" ]]; then
   BRANCH=""
 fi
-if [[ -z "$BRANCH" ]]; then
+if [[ -z $BRANCH ]]; then
   echo "[side-agent-start] Could not determine current branch in $WORKTREE."
   exit 1
 fi
 
 echo "[side-agent-start] agent=$AGENT_ID branch=$BRANCH main=$MAIN_BRANCH"
 
-if [[ "$BRANCH" == "$MAIN_BRANCH" ]]; then
+if [[ $BRANCH == "$MAIN_BRANCH" ]]; then
   echo "[side-agent-start] ERROR: child worktree is on $MAIN_BRANCH; expected a dedicated agent branch."
   exit 1
 fi

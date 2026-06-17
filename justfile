@@ -55,12 +55,6 @@ fmt-check:
 # Run all checks: formatting + flake check
 check-all: fmt-check check
 
-# Install git hooks (symlink scripts/hooks/* -> .git/hooks/)
-init-hooks:
-    @for hook in pre-commit pre-push; do \
-      ln -sf ../../scripts/hooks/$hook .git/hooks/; \
-    done && echo "installed: pre-commit, pre-push"
-
 # Interactive nix repl with this flake loaded
 repl *args:
     nix repl . {{ args }}

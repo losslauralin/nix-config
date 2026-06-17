@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# pre-push hook: run full flake check before push
-# Installed by: just init-hooks
-
-set -euo pipefail
-
-echo "--- pre-push: fmt-check + flake check ---"
-nix run nixpkgs#just -- fmt-check
-nix run nixpkgs#just -- check

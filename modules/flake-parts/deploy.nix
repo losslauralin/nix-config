@@ -1,16 +1,4 @@
 {inputs, ...}: {
-  imports = [
-    inputs.make-shell.flakeModules.default
-  ];
-
-  perSystem = {pkgs, ...}: {
-    make-shells.default = {
-      packages = [
-        pkgs.deploy-rs
-      ];
-    };
-  };
-
   flake = {
     lib,
     config,

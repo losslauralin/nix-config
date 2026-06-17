@@ -26,11 +26,16 @@ jobs:
   check:
     name: nix flake check
     runs-on: ubuntu-latest
+    # FlakeHub OIDC：determinate-nix-action 用 id-token 自动认证 FlakeHub
+    # （私有 flake / FlakeHub Cache）。本仓库目前不依赖，但保留无害。
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v16
+      - name: Install Determinate Nix
+        uses: DeterminateSystems/determinate-nix-action@v3
       - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v9
+        uses: DeterminateSystems/magic-nix-cache-action@v14
       - name: nix flake check
         run: nix flake check --no-build --no-warn-dirty

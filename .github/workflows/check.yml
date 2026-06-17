@@ -1,12 +1,22 @@
 # CI gate: NixOS flake 的持续集成验证。
-# NixOS 的产物是完整系统 / 虚拟机 / 磁盘镜像 —— 不适合像软件项目那样
-# "build + test + cache artifact"。所以 CI 只做：
-#   1. 格式检查（just fmt-check）
-#   2. Lint（just lint）
-#   3. Flake eval 集成测试（just check —— 实际就是 nix flake check）
 #
-# 不构建 host closure、不产出 artifact、不部署。
-# VM 构建留给本地 just build-vm，部署走 host 端 just switch。
+# 本仓库的产物是完整 NixOS 系统 / 虚拟机 / 磁盘镜像 —— 不适合像软件项目那样
+# "build + test + cache artifact"。CI 只做一件事：在干净的 ubuntu runner 上
+# 评估整个 flake (`nix flake check`)，等价于本地的 `just check`。
+#
+# 这一条 step 已经覆盖：
+#   - treefmt --fail-on-change (alejandra / deadnix / statix / shellcheck /
+#     ruff-check / shfmt / biome / yamlfmt / jsonfmt / ...)
+#   - 所有 nixosConfigurations.<host> 的 module 评估
+#   - 所有 packages / overlays / checks / devShells 的评估
+#   - 所有 flake input 在裸环境下能正常 fetch
+#
+# pre-commit hook（cachix/git-hooks.nix）在本地工作目录里跑 treefmt；
+# pre-push hook 跑 `nix flake check`。CI 是这条本地链的不可绕过版本——
+# 防 `--no-verify`、防新机器漏装 hook、防外部 PR 没装 hook。
+#
+# 不构建 host closure / 不产出 artifact / 不部署 / 不缓存 nix store。
+# VM 构建走本地 just build-vm；部署走 host 端 just switch / deploy-rs。
 name: CI
 on:
   push:
@@ -14,7 +24,7 @@ on:
   pull_request:
 jobs:
   check:
-    name: Check
+    name: nix flake check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,9 +32,5 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v16
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v9
-      - name: Format check (treefmt)
-        run: nix run nixpkgs#just -- fmt-check
-      - name: Lint
-        run: nix run nixpkgs#just -- lint
-      - name: Flake check (eval all hosts + packages)
-        run: nix run nixpkgs#just -- check
+      - name: nix flake check
+        run: nix flake check --no-warn-dirty

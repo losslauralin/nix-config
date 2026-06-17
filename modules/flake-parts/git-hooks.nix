@@ -28,7 +28,9 @@
         nix-flake-check = {
           enable = true;
           name = "nix flake check";
-          entry = "${pkgs.nix}/bin/nix flake check --no-build --no-warn-dirty";
+          # 不能加 --no-build：catppuccin home-manager 的 bottom 模块走 IFD,
+          # --no-build 会让本地 push 同样撞 `...catppuccin-bottom...drv is not valid`。
+          entry = "${pkgs.nix}/bin/nix flake check --no-warn-dirty";
           language = "system";
           pass_filenames = false;
           stages = ["pre-push"];

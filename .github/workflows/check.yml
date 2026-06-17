@@ -38,4 +38,8 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v14
       - name: nix flake check
-        run: nix flake check --no-build --no-warn-dirty
+        # 不能加 --no-build：catppuccin home-manager 的 bottom 模块走 IFD
+        # (import-from-derivation)，--no-build 会拒绝构建 IFD 所需 drv，
+        # 触发 `path '...catppuccin-bottom...drv' is not valid` eval 失败。
+        # magic-nix-cache 已托管 store，完整 check 与 --no-build 几无差距。
+        run: nix flake check --no-warn-dirty

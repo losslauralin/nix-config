@@ -62,7 +62,6 @@
               environment = {
                 AXONHUB_DB_DIALECT = "postgres";
                 AXONHUB_DB_DSN = "postgres://axonhub:axonhub_password@postgres:5432/axonhub?sslmode=disable";
-                AXONHUB_SERVER_API_AUTH_ALLOW_NO_AUTH = "true";
               };
               ports = ["8090:8090"];
               networks = ["axonhub-network"];

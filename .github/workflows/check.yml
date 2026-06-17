@@ -8,30 +8,23 @@
 # 不构建 host closure、不产出 artifact、不部署。
 # VM 构建留给本地 just build-vm，部署走 host 端 just switch。
 name: CI
-
 on:
   push:
     branches: [main, master]
   pull_request:
-
 jobs:
   check:
     name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v16
-
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v9
-
       - name: Format check (treefmt)
         run: nix run nixpkgs#just -- fmt-check
-
       - name: Lint
         run: nix run nixpkgs#just -- lint
-
       - name: Flake check (eval all hosts + packages)
         run: nix run nixpkgs#just -- check

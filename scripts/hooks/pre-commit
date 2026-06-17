@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# pre-commit hook: run linter before commit
+# Installed by: just init-hooks
+
+set -euo pipefail
+
+echo "--- pre-commit: lint ---"
+nix run nixpkgs#just -- lint

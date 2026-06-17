@@ -31,6 +31,14 @@ result-nixos-niri-dms-vm
 result-hm-gen
 secrets/vm-key.txt
 
+# Nix flake check artifacts
+791040dst
+791040src
+
+# Research / planning docs (not config)
+PLAN.md
+docs/den/
+
 # Pix Agent
 .ai/
 .pi-lens/

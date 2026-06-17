@@ -1,19 +1,37 @@
-# CI 守门:与 docs/agents/adding-a-feature.md Step 6 对应 —— 格式 + flake 求值必须绿。
-# 只做 eval 级检查,不构建 host closure、不产出 artifact、不部署(NixOS 配置无 release 流程;
-# VM 构建留给本地 just build-vm,部署走 host 端 just switch)。
-# 统一走 justfile 入口(nix run nixpkgs#just),与本地验证流程同一套命令。
-name: check
+# CI gate: NixOS flake 的持续集成验证。
+# NixOS 的产物是完整系统 / 虚拟机 / 磁盘镜像 —— 不适合像软件项目那样
+# "build + test + cache artifact"。所以 CI 只做：
+#   1. 格式检查（just fmt-check）
+#   2. Lint（just lint）
+#   3. Flake eval 集成测试（just check —— 实际就是 nix flake check）
+#
+# 不构建 host closure、不产出 artifact、不部署。
+# VM 构建留给本地 just build-vm，部署走 host 端 just switch。
+name: CI
+
 on:
   push:
     branches: [main, master]
   pull_request:
+
 jobs:
-  flake-check:
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v16
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v9
+
       - name: Format check (treefmt)
         run: nix run nixpkgs#just -- fmt-check
-      - name: Flake check
+
+      - name: Lint
+        run: nix run nixpkgs#just -- lint
+
+      - name: Flake check (eval all hosts + packages)
         run: nix run nixpkgs#just -- check

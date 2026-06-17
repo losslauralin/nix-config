@@ -26,9 +26,15 @@ check *args:
 # build-vm <host> 后 boot
 test-vm host: (build-vm host) (run-vm host)
 
-# nix fmt [args]
+# Format only (alejandra, shfmt, rustfmt, black, gofmt, biome, yamlfmt, jsonfmt, etc.)
+# Skips linters (deadnix, statix, shellcheck, ruff-check)
 fmt *args:
-    nix fmt {{ args }}
+    nix fmt -- --formatters alejandra,shfmt,rustfmt,black,ruff-format,gofmt,gofumpt,biome,just,yamlfmt,jsonfmt {{ args }}
+
+# Lint only (deadnix, statix, shellcheck, ruff-check)
+# Exits non-zero on findings
+lint *args:
+    nix fmt -- --fail-on-change --formatters deadnix,statix,shellcheck,ruff-check {{ args }}
 
 # boot /tmp/result-<host>/bin/run-<host>-vm (Arch: 用 host qemu 替代 nix-store qemu)
 run-vm host:
@@ -48,6 +54,12 @@ fmt-check:
 
 # Run all checks: formatting + flake check
 check-all: fmt-check check
+
+# Install git hooks (symlink scripts/hooks/* -> .git/hooks/)
+init-hooks:
+    @for hook in pre-commit pre-push; do \
+      ln -sf ../../scripts/hooks/$hook .git/hooks/; \
+    done && echo "installed: pre-commit, pre-push"
 
 # Interactive nix repl with this flake loaded
 repl *args:

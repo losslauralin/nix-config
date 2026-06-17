@@ -25,6 +25,7 @@
 
 set -euo pipefail
 
+# shellcheck disable=SC2034
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 HOST="${1:-nixos-niri-vm}"
 # Strip the host arg from $@ so remaining args pass through to qemu

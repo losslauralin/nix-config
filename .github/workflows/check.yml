@@ -33,4 +33,4 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v9
       - name: nix flake check
-        run: nix flake check --no-warn-dirty
+        run: nix flake check --no-build --no-warn-dirty

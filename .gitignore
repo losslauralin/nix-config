@@ -45,3 +45,8 @@ docs/den/
 # Pix Agent
 .ai/
 .pi-lens/
+
+# Node.js (accidental npm init)
+node_modules/
+package.json
+package-lock.json

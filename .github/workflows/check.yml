@@ -11,9 +11,9 @@
 #   - 所有 packages / overlays / checks / devShells 的评估
 #   - 所有 flake input 在裸环境下能正常 fetch
 #
-# pre-commit hook（cachix/git-hooks.nix）在本地工作目录里跑 treefmt；
-# pre-push hook 跑 `nix flake check`。CI 是这条本地链的不可绕过版本——
-# 防 `--no-verify`、防新机器漏装 hook、防外部 PR 没装 hook。
+# pre-commit hook（cachix/git-hooks.nix）在本地工作目录里跑 treefmt（秒级）。
+# CI 是这条本地链的不可绕过版本——防 `--no-verify`、防新机器漏装 hook、防外部 PR 没装 hook。
+# 重度 `nix flake check` 仅在 CI 运行；本地需要时手动 `just check`。
 #
 # 不构建 host closure / 不产出 artifact / 不部署 / 不缓存 nix store。
 # VM 构建走本地 just build-vm；部署走 host 端 just switch / deploy-rs。

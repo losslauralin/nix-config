@@ -8,7 +8,9 @@
 # so a single `treefmt` hook covers everything we need pre-commit.
 #
 #   pre-commit  → treefmt (--fail-on-change): format + static lint
-#   pre-push    → nix flake check
+#
+# Heavy validation (`nix flake check`) is deferred to GitHub Actions.
+# Run `nix flake check --no-warn-dirty` manually before push when desired.
 #
 # Hooks are installed automatically when entering the devshell
 # (devshell.nix wires in config.pre-commit.installationScript).
@@ -17,23 +19,12 @@
     inputs.git-hooks.flakeModule
   ];
 
-  perSystem = {pkgs, ...}: {
+  perSystem = _: {
     pre-commit.settings = {
       hooks = {
         treefmt = {
           enable = true;
           # Native integration — already runs in --fail-on-change mode.
-        };
-
-        nix-flake-check = {
-          enable = true;
-          name = "nix flake check";
-          # 不能加 --no-build：catppuccin home-manager 的 bottom 模块走 IFD,
-          # --no-build 会让本地 push 同样撞 `...catppuccin-bottom...drv is not valid`。
-          entry = "${pkgs.nix}/bin/nix flake check --no-warn-dirty";
-          language = "system";
-          pass_filenames = false;
-          stages = ["pre-push"];
         };
       };
     };

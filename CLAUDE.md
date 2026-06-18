@@ -100,7 +100,7 @@ The local/CI validation chain lives in `modules/flake-parts/`:
 
 | Module | Role |
 |---|---|
-| `git-hooks.nix` | Declares hooks via `cachix/git-hooks.nix` flake module. `pre-commit` runs `treefmt --fail-on-change`; `pre-push` runs `nix flake check --no-warn-dirty`. |
+| `git-hooks.nix` | Declares hooks via `cachix/git-hooks.nix` flake module. `pre-commit` runs `treefmt --fail-on-change`. Heavy `nix flake check` deferred to CI; run `just check` manually when desired. |
 | `formatter.nix` | `treefmt-nix` configuration. Registers formatters **and** static linters as treefmt programs (alejandra, deadnix, statix, shfmt, shellcheck, rustfmt, black, ruff-format, ruff-check, gofmt, gofumpt, biome, just, yamlfmt, jsonfmt). Excludes `*.md`, `secrets/**`, `**/facter.json`, etc. |
 | `devshell.nix` | Minimal `nix develop` shell whose only job is to run `pre-commit.installationScript` so the hooks are wired into `.git/hooks/`. |
 | `.github/workflows/check.yml` | CI: `ubuntu-latest` + `determinate-nix-action@v3` + `magic-nix-cache@v14`, single `nix flake check` step. Cannot use `--no-build` (catppuccin IFD). |

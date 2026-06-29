@@ -1,28 +1,33 @@
 ---
 name: declare-den-host
-description: Guide agents through declaring a new den host Entity and composing its host primary Aspect from reusable Aspects in this nix-config repository. Use when the user asks to add a host, define a machine, create a VM/WSL/desktop/headless system, or build a host from existing den Aspects.
+description: Host declaration work for den host Entities, modules/hosts/<host>/default.nix, desktop/VM/WSL/server composition, or Host spec versus Host opt-in decisions.
 ---
 
 # Declare Den Host
 
-## Quick start
+Declare a machine and its host primary Aspect. Use `add-aspect` first when the requested host needs a reusable capability that does not already exist.
 
-1. Read `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, and `docs/agents/den-configuration-patterns.md`.
-2. Determine the host kind and intent: WSL, VM, headless VM, physical machine, desktop profile, server/headless, or special test host.
-3. Register the host Entity in `modules/flake-parts/hosts.nix`.
-4. Add `modules/hosts/<host-name>/default.nix` with `den.aspects.<host-name>` as the host primary Aspect.
-5. Compose reusable capabilities through `includes`; keep host-specific hardware/scenario config inline in the host `nixos` block.
-6. Validate with repo `just` wrappers.
+## Flow
 
-## Host declaration shape
+1. Load the Den gate: read `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, `.agents/skills/nixos-den-best-practices/SKILL.md`, and `docs/agents/den-configuration-patterns.md`. Continue only when host Entity, host primary Aspect, and validation constraints are clear.
+2. Classify the host: WSL, VM, headless VM, physical desktop/laptop, server/headless, image/test host, or special one-off. Classification is complete when the host kind determines required batteries, profiles, and validation.
+3. Register the Entity in `modules/flake-parts/hosts.nix`. For WSL set `wsl.enable = true`; for normal hosts declare `users.loss = {};` unless the request names another user topology.
+4. Create `modules/hosts/<host-name>/default.nix` with `den.aspects.<host-name>` as the host primary Aspect. Keep the exact host name consistent between Entity and Aspect.
+5. Compose reusable behavior through `includes`: existing system/desktop/virt/security profiles, Host opt-ins, or bundles. If a missing reusable behavior is needed by multiple hosts or owns real coordination, switch to `add-aspect` for that behavior before including it.
+6. Put host-only facts inline in the host `nixos` block: hardware imports, disk/facter paths, VM-only tweaks, display manager user, single-host toggles, and `nixpkgs.hostPlatform`.
+7. Add `user.extraGroups` or explicit cross-entity delivery only when the host truly owns that relationship. User's own tools stay in the user primary Aspect, not the host primary Aspect.
+8. `git add modules/hosts/<host-name>/default.nix` before evaluation so `vic/import-tree` can see it.
+9. Validate with repo wrappers only: `just fmt` and `just check`; add `just build-vm <host-name>` for VM hosts, image commands for image variants, and the relevant known desktop VM build when a shared desktop profile changed.
 
-Host Entity declarations live in `modules/flake-parts/hosts.nix`:
+## Shapes
+
+Host Entity:
 
 ```nix
 den.hosts.x86_64-linux.<host-name>.users.loss = {};
 ```
 
-For WSL hosts, set the freeform WSL flag on the Entity:
+WSL Entity:
 
 ```nix
 den.hosts.x86_64-linux.<host-name> = {
@@ -31,9 +36,7 @@ den.hosts.x86_64-linux.<host-name> = {
 };
 ```
 
-## Host primary Aspect shape
-
-Create `modules/hosts/<host-name>/default.nix`:
+Host primary Aspect:
 
 ```nix
 {lossilk, ...}: {
@@ -41,12 +44,12 @@ Create `modules/hosts/<host-name>/default.nix`:
     includes = with lossilk; [
       system
       nix
-      # Add reusable host opt-ins / profiles here.
+      # Reusable profiles / host opt-ins here.
     ];
 
     nixos = _: {
       nixpkgs.hostPlatform = "x86_64-linux";
-      # Host spec only: hardware, disk, display, VM-only tweaks, one-host toggles.
+      # Host spec only: hardware, disk, display, VM-only tweaks.
     };
 
     user.extraGroups = ["video" "input"];
@@ -54,78 +57,18 @@ Create `modules/hosts/<host-name>/default.nix`:
 }
 ```
 
-## Composition rules
+## Decision Rules
 
-- Reusable recipe across hosts → create/use Host opt-in Aspect and include it.
-- Stable desktop/system combination → include a Profile / Bundle such as `lossilk.desktop._.niri-dms-desktop`.
-- Hardware, disk layout, facter report, one-host toggles → Host spec inline in the host `nixos` block.
-- User's own tools → `modules/users/<user>.nix` user primary Aspect includes, not host Aspect.
-- Primary user receives host-selected `homeManager` companion config only if the user includes `den.batteries.host-aspects`.
-- Multi-user or conditional host-to-user delivery → prefer explicit `provides.to-users` / `provides.<user>`.
+- Host spec: one host, hardware, disk, facter, image detail, display/session tweak, or one-line toggle.
+- Host opt-in Aspect: reusable across hosts, non-trivial coordination, or a named capability hosts intentionally choose.
+- Profile / Bundle: stable route table of existing Aspects; it should not become the implementation home for unrelated leaf config.
+- User primary Aspect: user's shell/dev/AI/dotfile choices and other personal environment includes.
+- Explicit provides: multi-user or conditional host-to-user delivery.
 
-## Common host patterns
+## Completion Check
 
-### Desktop VM
-
-```nix
-{lossilk, ...}: {
-  den.aspects.nixos-niri-dms-vm = {
-    includes = with lossilk; [
-      desktop._.niri-dms-desktop
-      virt._.vm
-    ];
-    nixos = _: {
-      nixpkgs.hostPlatform = "x86_64-linux";
-      services.greetd.settings.default_session.user = "loss";
-    };
-    user.extraGroups = ["video" "input"];
-  };
-}
-```
-
-### WSL
-
-```nix
-{lossilk, ...}: {
-  den.aspects.nixos-wsl = {
-    includes = with lossilk; [
-      system
-      nix
-      virt._.wsl
-    ];
-    nixos = _: {
-      wsl.docker-desktop.enable = true;
-      wsl.useWindowsDriver = true;
-      nixpkgs.hostPlatform = "x86_64-linux";
-    };
-  };
-}
-```
-
-## Critical checks
-
-- Use the exact host name consistently in Entity and `den.aspects.<host-name>`.
-- Do not hide host business profiles in `den.default`.
-- Do not create a new reusable Aspect for a single-host one-line setting.
-- New host files under `modules/hosts/**/*.nix` must be `git add`ed before eval.
-- Ask before touching `flake.nix`, `flake.lock`, or `pkgs/*`.
-
-## Validation
-
-```bash
-just fmt
-just check
-```
-
-For VM hosts:
-
-```bash
-just build-vm <host-name>
-```
-
-For image variants:
-
-```bash
-just list-image-variants <host-name>
-just build-image <host-name> <variant>
-```
+- Entity and `den.aspects.<host-name>` use the same name and intended system.
+- WSL, VM, image, and desktop-specific requirements are reflected in includes and validation.
+- Host spec is inline; reusable behavior is not buried in one host file.
+- New host files are git-tracked before evaluation.
+- Validation command matches host kind and uses only `just` wrappers.

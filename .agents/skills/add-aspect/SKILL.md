@@ -1,42 +1,28 @@
 ---
 name: add-aspect
-description: Guide agents through adding or modifying a den feature Aspect in this nix-config repository. Use when the user asks to add a NixOS/Home Manager feature, create a den Aspect, wire an include, add a selection variant, extension, profile, bundle, integration edge, or reusable host opt-in under modules/.
+description: Aspect work for reusable den features, selection variants, extensions, profiles, bundles, integration edges, host opt-ins, or module includes under modules/.
 ---
 
 # Add Aspect
 
-## Quick start
+Add or change a reusable `lossilk.*` Aspect. Keep host-only hardware/scenario settings out of this skill; use `declare-den-host` for new hosts and inline host specs.
 
-1. Read, in order: `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, `docs/agents/adding-a-feature.md`, `docs/agents/den-configuration-patterns.md`.
-2. Classify the request before editing: Host spec, Host opt-in, Leaf Aspect, Family Root, Selection Variant, Extension, Profile / Bundle, Integration Edge, Policy, Quirk, or Battery usage.
-3. Choose `modules/<concern>/...` by primary functional intent, not by implementation shape.
-4. Create/modify the `lossilk.<concern>._.<name>` Aspect using new-file attrpath style.
-5. Wire the include in the owner location: user primary Aspect, host primary Aspect, profile/bundle, family root, or feature dependency.
-6. Validate with repo wrappers only.
+## Flow
 
-## Placement rules
+1. Load the Den gate: read `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, and `.agents/skills/nixos-den-best-practices/SKILL.md`. Continue only after the request is Den semantic work and the repo command/file constraints are known.
+2. Read task docs by branch: for feature/config work read `docs/agents/adding-a-feature.md` and `docs/agents/den-configuration-patterns.md`; for uncertain upstream semantics read the relevant local docs under `/home/loss/workspace/nix-ref/den/docs`. The branch is complete when every rule needed for the requested change has an authority file.
+3. Classify the change before editing: Leaf Aspect, Family Root, Selection Variant, Extension, Profile / Bundle, Integration Edge, Host opt-in, Policy, Quirk, Battery usage, or ordinary class config. If it is Host spec, move the change to the host primary Aspect instead of creating a reusable Aspect.
+4. Choose physical ownership by primary concern and logical ownership by matching `lossilk.<concern>._.*`; use `.agents/skills/nixos-den-best-practices/REFERENCE.md#taxonomy` only when the concern is not obvious. Placement is complete when the path and Aspect path name the same concern.
+5. Write or update the smallest Aspect that owns the behavior. New files use attrpath style, root Aspect functions request only Den Context args, class blocks request Nix module args with `...`, and parent Aspects do not stand in for child includes.
+6. Wire the include at the owning site: user primary Aspect, host primary Aspect, profile/bundle, family root, variant, extension, integration edge, or explicit cross-entity provides. Wiring is complete when the DAG edge explains who selected the capability.
+7. If a new `modules/**/*.nix` file was created, `git add` it before evaluation so `vic/import-tree` can see it.
+8. Validate through repo wrappers only. Run `just fmt` and `just check` for Nix changes; add `just build-vm nixos-niri-dms-vm` for desktop/host-impacting changes. For docs/skills-only edits, `git diff --check` is sufficient.
 
-Use the repo taxonomy:
+## Authoring Shapes
 
-| Concern | Path | Aspect path |
-|---|---|---|
-| CLI, shell, TUI | `modules/cli/` | `lossilk.cli._.*` |
-| Dev, editors, languages, git | `modules/dev/` | `lossilk.dev._.*` |
-| Desktop, browser, terminal, appearance | `modules/desktop/` | `lossilk.desktop._.*` |
-| Network, SSH, VPN, firewall | `modules/networking/` | `lossilk.networking._.*` |
-| Boot, filesystem, power, peripherals | `modules/system/` | `lossilk.system._.*` |
-| VM, container, WSL | `modules/virt/` | `lossilk.virt._.*` |
-| Security, secrets, auth | `modules/security/` | `lossilk.security._.*` |
-| AI tools | `modules/ai/` | `lossilk.ai._.*` |
-
-Do not create empty namespace roots. Do not put business features in `den.default`.
-
-## Authoring patterns
-
-### Single-class leaf
+Single-class leaf:
 
 ```nix
-# modules/cli/example-tool.nix
 {lossilk, ...}: {
   lossilk.cli._.example-tool.homeManager = {pkgs, ...}: {
     home.packages = [pkgs.example-tool];
@@ -44,7 +30,7 @@ Do not create empty namespace roots. Do not put business features in `den.defaul
 }
 ```
 
-### Multi-class feature
+Multi-class feature:
 
 ```nix
 {lossilk, ...}: {
@@ -55,7 +41,7 @@ Do not create empty namespace roots. Do not put business features in `den.defaul
 }
 ```
 
-### Selection variant
+Selection variant:
 
 ```nix
 {den, lossilk, ...}: {
@@ -69,28 +55,10 @@ Do not create empty namespace roots. Do not put business features in `den.defaul
 }
 ```
 
-## Critical checks
+## Completion Check
 
-- New files use `{lossilk, ...}:` / `{den, lossilk, ...}:`; do not use `<lossilk/...>` in new files.
-- Aspect root function args are den Context (`{host}`, `{user}`, `{host, user}`, `{home}`), not Nix module args.
-- Class blocks receive Nix module args and should include `...`, e.g. `{pkgs, lib, ...}:`.
-- Parent Aspect includes do not auto-enable children. Include children explicitly or create a meta-aspect.
-- New `modules/**/*.nix` files must be `git add`ed before evaluation because `vic/import-tree` scans tracked files.
-- Ask before modifying `flake.nix`, `flake.lock`, or `pkgs/*`.
-
-## Validation
-
-Use just wrappers, never raw `nix` / `nh` / `nixos-rebuild`:
-
-```bash
-just fmt
-just check
-```
-
-For desktop/host changes also run:
-
-```bash
-just build-vm nixos-niri-dms-vm
-```
-
-For documentation or skill-only edits, `git diff --check` is sufficient unless Nix files changed.
+- Semantic type and ownership path are stated or obvious from the edit.
+- Include path is explicit; no business config moved into `den.default`.
+- Cross-entity delivery, if present, uses user includes, `host-aspects`, or explicit provides intentionally.
+- No new untracked `modules/**/*.nix` file is left invisible to import-tree.
+- Validation matched the change impact and used only `just` wrappers.

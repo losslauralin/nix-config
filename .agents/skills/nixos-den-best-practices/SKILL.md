@@ -1,97 +1,37 @@
 ---
 name: nixos-den-best-practices
-description: Best-practice guardrails for writing den-based NixOS and Home Manager configuration in this nix-config repository. Use when reviewing, planning, or editing den Aspects, includes, entities, policies, quirks, batteries, cross-entity delivery, or modules/**/*.nix configuration.
+description: Den gate for planning, editing, or reviewing den Entities, Aspects, includes, policies, quirks, batteries, cross-entity delivery, or modules/**/*.nix ownership.
 ---
 
 # NixOS Den Best Practices
 
-## Quick start
+Use this as the shared gate for Den semantic work. It is not a feature-authoring flow; call `add-aspect` or `declare-den-host` when the task has that narrower shape.
 
-Before den semantic work, read:
+## Gate
 
-1. `AGENTS.md`
-2. `CONTEXT.md`
-3. `docs/frameworks/den.md`
-4. Relevant local den docs under `/home/loss/workspace/nix-ref/den/docs` if upstream semantics are needed.
+1. Confirm scope. Apply this skill only when the change affects Den semantics: `den.hosts`, users/homes, `den.aspects.*`, `lossilk.*`, `includes`, `provides`, policies, quirks, batteries, class blocks, or `modules/**/*.nix` ownership. If it is ordinary shell/docs/package work, leave the gate.
+2. Read authorities in order: `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, then the task-specific docs. Use `/home/loss/workspace/nix-ref/den/docs` only when upstream semantics are needed or repo docs are unclear.
+3. Name the semantic role before editing: Entity, Host spec, Host opt-in, Leaf Aspect, Family Root, Selection Variant, Extension, Profile / Bundle, Integration Edge, Policy, Quirk, Battery usage, or ordinary class config. Continue only when the role has a single owner.
+4. Check ownership: physical path follows primary concern, logical path follows matching `lossilk.<concern>._.*`, and no business feature is hidden in `den.default`.
+5. Check execution shape: Aspect root functions request Den Context args, class blocks request Nix module args with `...`, parent Aspects do not imply child Aspects, and deprecated wrappers are absent.
+6. Check delivery: user-owned environment goes through user primary Aspect includes; host-selected companion config requires user opt-in to `host-aspects`; multi-user or conditional delivery uses explicit provides.
+7. Check file/command safety: ask before `flake.nix`, `flake.lock`, or `pkgs/*`; `git add` new `modules/**/*.nix` files before eval; use repo `just` wrappers only.
+8. Validate according to impact. Docs/skills-only edits need `git diff --check`; Den module edits need at least `just fmt` and `just check`; host/desktop edits need the relevant VM/image build.
 
-Use this skill like a preflight/review checklist, similar to a framework best-practices guide.
+## Reference Pointers
 
-## Terminology discipline
+Open `.agents/skills/nixos-den-best-practices/REFERENCE.md` only for the branch you need:
 
-- Entity declares what exists: host, user, home. Do not call it resource/instance.
-- Aspect declares what it does. Do not call it a NixOS module.
-- `includes` is an Aspect DAG dependency, not a Nix `imports` entry.
-- Class is Nix module eval domain (`nixos`, `homeManager`, `user`, `wsl`), not Entity Kind.
-- Context is den pipeline data shape (`{host}`, `{host, user}`), not `_module.args`.
-- Family Root, Selection Variant, Extension, Profile / Bundle, and Integration Edge are distinct semantic roles.
+- `#terminology` for repo words and avoid-words.
+- `#taxonomy` for concern-to-path mapping.
+- `#authoring` for attrpath, context, class, and include rules.
+- `#delivery` for cross-entity delivery choices.
+- `#validation` for command and tracking rules.
+- `#red-flags` for review failure modes.
 
-## Architecture rules
+## Completion Check
 
-- Place files by primary concern under `modules/<concern>/`, not by technical shape like daemon/systemd/GUI.
-- Keep logical Aspect path aligned with physical concern: `modules/desktop/...` should expose `lossilk.desktop._...`.
-- `den.default` is only for framework defaults: stateVersion, allowUnfree, define-user, hostname, pipeline defaults.
-- Business baselines and desktop/dev/tool choices must be explicit host or user opt-ins.
-- Parent Aspect inclusion does not enable children; explicitly include children or define a meta-aspect.
-- Do not rely on `lossilk.foo._` collecting provides children; that behavior is unpublished and does not collect provides items.
-
-## Authoring rules
-
-- New files use attrpath style:
-
-```nix
-{lossilk, ...}: {
-  lossilk.cli._.example.homeManager = {pkgs, ...}: {
-    home.packages = [pkgs.example];
-  };
-}
-```
-
-- Preserve legacy angle-bracket includes only in existing files that already use them.
-- Aspect root function args are den Context and define activation:
-  - `{host}` host context
-  - `{user}` user context
-  - `{host, user}` host-to-user fan-out
-  - `{home}` standalone home context
-- Nix module args belong inside class blocks and should include `...`.
-- Do not use deprecated wrappers: `den.lib.parametric`, `den.lib.perHost`, `den.lib.take.exactly`.
-- Prefer den batteries when they match: `define-user`, `hostname`, `primary-user`, `host-aspects`, `user-shell`, WSL auto battery.
-
-## Cross-entity delivery
-
-- User's own environment: put includes in the user primary Aspect (`den.aspects.<user>.includes`).
-- Primary user receiving host desktop/profile companion config: user explicitly includes `den.batteries.host-aspects`.
-- Multi-user or conditional host-to-user delivery: use `provides.to-users` or `provides.<user>`.
-- User-to-host delivery via `provides.to-hosts` is rare and only for user-specific host patches.
-- Do not assume `host-aspects` is required for normal user includes to work.
-
-## File and command safety
-
-- Ask before modifying `flake.nix`, `flake.lock`, or `pkgs/*`.
-- New `modules/**/*.nix` files must be `git add`ed before evaluation because `vic/import-tree` only scans tracked files.
-- Use repo wrappers only:
-
-```bash
-just fmt
-just check
-just check-all
-just build-vm <host>
-just diff <host>
-just repl
-```
-
-Never call raw `nix`, `nh`, or `nixos-rebuild` when a `just` wrapper exists.
-
-## Review checklist
-
-Before finalizing den changes, verify:
-
-- Correct semantic type was chosen.
-- Entity Kind and Class were not conflated.
-- Physical path and `lossilk.*` path follow Modules Taxonomy.
-- Includes DAG is explicit and debuggable.
-- Cross-entity delivery path is intentional.
-- No business config leaked into `den.default`.
-- No new untracked Nix file is being missed by import-tree.
-- Validation command matches change impact.
-
-For doc/skill-only changes, run `git diff --check` and state that no Nix evaluation-impacting files changed.
+- The semantic role, owner path, and include/delivery edge are coherent.
+- No Den Context, Class, or Entity Kind terms are conflated.
+- No new untracked Nix file is invisible to import-tree.
+- Validation used the wrapper appropriate to the changed surface.

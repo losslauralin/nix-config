@@ -8,8 +8,9 @@ Personal NixOS configuration built with [denful/den](https://github.com/denful/d
 
 ```bash
 just                # nix flake check (default)
-just switch .#<host> [--ask --update]   # deploy
-just build  .#<host> [--ask]            # build without deploying
+just os-switch .#<host> [--ask --update] # deploy via NH
+just os-build  .#<host> [--ask]          # build OS via NH without deploying
+just build <installable>                 # generic nix build
 just build-vm <vm-host>                 # build VM image to /tmp/result-<host>/
 just update                             # nix flake update
 just fmt / just lint                    # format only / lint only
@@ -35,11 +36,11 @@ After cloning, run `nix develop` once to install the pre-commit git hooks (see [
 
 ## Architecture
 
-Den decomposes config into **entities** (host, user, home) and **aspects** (composable, multi-class config bundles). Entity declarations live in `modules/den.nix`; aspects declare configuration and bind by name convention (`den.aspects.<entity-name>`). The `modules/` layout follows the concern-first taxonomy documented in `CONTEXT.md`.
+Den decomposes config into **entities** (host, user, home) and **aspects** (composable, multi-class config bundles). Host entity declarations live beside their host primary aspects in `modules/hosts/<host>/default.nix`; aspects declare configuration and bind by name convention (`den.aspects.<entity-name>`). The `modules/` layout follows the concern-first taxonomy documented in `CONTEXT.md`.
 
 ```
 modules/
-├── den.nix              ← den wiring, namespace "lossilk", framework defaults, entities
+├── den.nix              ← den wiring, namespace "lossilk", framework defaults
 ├── schema/host/         ← den.schema.host metadata interfaces (display facts, etc.)
 ├── hosts/               ← per-host main aspects and host specs
 ├── users/               ← per-user main aspects
@@ -113,7 +114,7 @@ sudo nixos-install --flake .#<host>
 reboot
 
 # 6. After reboot — deploy updates
-just switch .#<host>
+just os-switch .#<host>
 ```
 
 ### VM test loop (avoid bare metal rebuilds)
@@ -131,7 +132,7 @@ Edit host config → `just build-vm` → `just run-vm` → iterate, then deploy 
 
 ```bash
 # Import the WSL tarball (build on bare-metal or VM first)
-just build .#nixos-wsl
+just os-build .#nixos-wsl
 tar -czf nixos-wsl.tar.gz -C "$(nix eval --raw .#nixosConfigurations.nixos-wsl.config.system.build.toplevel)" .
 wsl --import nixos-wsl C:\wsl\nixos-wsl nixos-wsl.tar.gz
 wsl -d nixos-wsl
@@ -147,7 +148,7 @@ nix-config/
 ├── CLAUDE.md              ← AI assistant context + footguns
 ├── CONTEXT.md             ← domain glossary (aligned with den's glossary)
 ├── modules/               ← all config (auto-scanned by import-tree)
-│   ├── den.nix            ← den wiring (flakeModule, namespace "lossilk", defaults, entities)
+│   ├── den.nix            ← den wiring (flakeModule, namespace "lossilk", defaults)
 │   ├── schema/host/       ← den.schema.host metadata interfaces
 │   ├── audio.nix          ← lossilk.audio (pipewire)
 │   ├── hosts/             ← per-host main aspects + host specs

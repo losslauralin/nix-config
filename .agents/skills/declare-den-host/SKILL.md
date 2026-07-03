@@ -11,8 +11,8 @@ Declare a machine and its host primary Aspect. Use `add-aspect` first when the r
 
 1. Load the Den gate: read `AGENTS.md`, `CONTEXT.md`, `docs/frameworks/den.md`, `.agents/skills/nixos-den-best-practices/SKILL.md`, and `docs/agents/den-configuration-patterns.md`. Continue only when host Entity, host primary Aspect, and validation constraints are clear.
 2. Classify the host: WSL, VM, headless VM, physical desktop/laptop, server/headless, image/test host, or special one-off. Classification is complete when the host kind determines required batteries, profiles, and validation.
-3. Register the Entity in `modules/flake-parts/hosts.nix`. For WSL set `wsl.enable = true`; for normal hosts declare `users.loss = {};` unless the request names another user topology.
-4. Create `modules/hosts/<host-name>/default.nix` with `den.aspects.<host-name>` as the host primary Aspect. Keep the exact host name consistent between Entity and Aspect.
+3. Create `modules/hosts/<host-name>/default.nix` and register the host Entity there. For WSL set `wsl.enable = true`; for normal hosts declare `users.loss = {};` unless the request names another user topology.
+4. In the same file, declare `den.aspects.<host-name>` as the host primary Aspect. Keep the exact host name consistent between Entity and Aspect.
 5. Compose reusable behavior through `includes`: existing system/desktop/virt/security profiles, Host opt-ins, or bundles. If a missing reusable behavior is needed by multiple hosts or owns real coordination, switch to `add-aspect` for that behavior before including it.
 6. Put host-only facts inline in the host `nixos` block: hardware imports, disk/facter paths, VM-only tweaks, display manager user, single-host toggles, and `nixpkgs.hostPlatform`.
 7. Add `user.extraGroups` or explicit cross-entity delivery only when the host truly owns that relationship. User's own tools stay in the user primary Aspect, not the host primary Aspect.

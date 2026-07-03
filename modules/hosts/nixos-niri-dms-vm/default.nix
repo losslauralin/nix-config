@@ -2,12 +2,13 @@
 #
 # Host: nixos-niri-dms-vm —— qemu VM, 验证 niri + DankMaterialShell desktop 配置。
 # 与真机共享 lossilk.desktop._.niri-dms-desktop Profile / Bundle；本文件只保留 VM host spec。
-# 实体声明在 modules/den.nix
 #
 # 构建 + 启动:
 #   sudo nix build .#nixosConfigurations.nixos-niri-dms-vm.config.system.build.vm
 #   ./result/bin/run-nixos-niri-dms-vm-vm
 {lossilk, ...}: {
+  den.hosts.x86_64-linux.nixos-niri-dms-vm.users.loss = {};
+
   den.aspects.nixos-niri-dms-vm = {
     # host includes 收 nixos class 到本 host；其中的 homeManager/hjem 等 user classes
     # 由明确 opt-in 的 user（modules/users/loss.nix 中 den.batteries.host-aspects）接收。

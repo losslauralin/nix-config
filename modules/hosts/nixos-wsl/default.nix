@@ -1,8 +1,12 @@
 # modules/hosts/nixos-wsl/default.nix
 #
-# Host: nixos-wsl —— WSL2 NixOS 主机主切面
-# 实体声明在 modules/den.nix (`wsl.enable = true` 触发 den.batteries.wsl)
+# Host: nixos-wsl —— WSL2 NixOS 主机实体 + 主切面
 {lossilk, ...}: {
+  den.hosts.x86_64-linux.nixos-wsl = {
+    wsl.enable = true;
+    users.loss = {};
+  };
+
   den.aspects.nixos-wsl = {
     includes = with lossilk; [
       system # 系统底座 (locale / 时区 / TTY console)

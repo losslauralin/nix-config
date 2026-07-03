@@ -18,11 +18,12 @@ just fmt-check    # treefmt --fail-on-change across all programs (format + lint)
 just check-all    # fmt-check + check
 
 # Build / deploy
-just switch       # nh os switch            (e.g. just switch .#nixos-wsl --ask)
-just build        # nh os build
-just nb           # nix build --no-link wrapped with nom (exploratory builds)
+just os-switch    # nh os switch            (e.g. just os-switch .#nixos-wsl --ask)
+just os-build     # nh os build
+just build        # generic nix build wrapped with nom
+just nb           # generic nix build --no-link wrapped with nom (exploratory builds)
 just update       # nix flake update
-just clean        # nh clean [subcommand]   (default: all)
+just store-clean  # nh clean [subcommand]   (default: all)
 
 # VM / disk image
 just build-vm     # nix build .#<host>.config.system.build.vm -o /tmp/result-<host>

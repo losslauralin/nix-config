@@ -2,7 +2,7 @@
 #
 # User "loss" 主切面 —— 仅引跨平台/跨架构通用切面。
 # 平台/host 锁定的切面在对应 host 主切面 includes 里。
-# 实体声明在 modules/den.nix
+# User entity 由各 host 文件在 den.hosts.<system>.<host>.users.loss 声明。
 {
   den,
   # den angle-bracket syntax needs __findFile in lexical scope.

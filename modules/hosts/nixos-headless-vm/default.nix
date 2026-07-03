@@ -8,8 +8,6 @@
 # 与 headless 场景冲突. CLI 用户环境 (cli/dev/ai/security) 由
 # modules/users/loss.nix 主切面 + den.batteries.host-aspects 自动注入.
 #
-# 实体声明在 modules/flake-parts/hosts.nix.
-#
 # 构建 + 启动:
 #   just build-vm nixos-headless-vm
 #   just run-vm nixos-headless-vm
@@ -17,6 +15,8 @@
 #   nix build .#nixosConfigurations.nixos-headless-vm.config.system.build.vm -o result-nixos-headless-vm
 #   ./result-nixos-headless-vm/bin/run-nixos-headless-vm-vm
 {lossilk, ...}: {
+  den.hosts.x86_64-linux.nixos-headless-vm.users.loss = {};
+
   den.aspects.nixos-headless-vm = {
     # host includes 收 nixos class 到本 host; user classes (homeManager/hjem)
     # 由 users/loss.nix 中显式 opt-in 的 den.batteries.host-aspects 接收.

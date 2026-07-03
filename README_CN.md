@@ -8,8 +8,9 @@
 
 ```bash
 just                # nix flake check
-just switch .#<host> [--ask --update]
-just build  .#<host> [--ask]
+just os-switch .#<host> [--ask --update] # 通过 NH 部署
+just os-build  .#<host> [--ask]          # 通过 NH 构建 OS, 不部署
+just build <installable>                 # 通用 nix build
 just build-vm <vm-host>        # 构建 VM 镜像到 result-<host>/
 just update                    # nix flake update
 just fmt; just fmt-check       # 格式化 + 检查格式
@@ -29,11 +30,11 @@ just fmt; just fmt-check       # 格式化 + 检查格式
 
 ## 架构
 
-den 把配置拆成**实体** (host / user / home) 和**切面 aspect** (可组合、跨 class 的配置包)。实体声明集中在 `modules/den.nix`，切面声明实际配置，通过同名约定绑定（`den.aspects.<实体名>`）。`modules/` 布局遵循 `CONTEXT.md` 中的 concern-first 分类规则。
+den 把配置拆成**实体** (host / user / home) 和**切面 aspect** (可组合、跨 class 的配置包)。host 实体声明与对应 host 主切面放在同一个 `modules/hosts/<host>/default.nix`，切面声明实际配置，通过同名约定绑定（`den.aspects.<实体名>`）。`modules/` 布局遵循 `CONTEXT.md` 中的 concern-first 分类规则。
 
 ```
 modules/
-├── den.nix              ← den 接线、namespace "lossilk"、框架默认、实体声明
+├── den.nix              ← den 接线、namespace "lossilk"、框架默认
 ├── schema/host/         ← den.schema.host 元数据接口（display facts 等）
 ├── hosts/               ← 各 host 主切面和 host spec
 ├── users/               ← 各 user 主切面
@@ -93,7 +94,7 @@ sudo nixos-install --flake .#<host>
 reboot
 
 # 6. 重启后日常更新
-just switch .#<host>
+just os-switch .#<host>
 ```
 
 ### VM 测试循环（避免真机反复重建）
@@ -111,7 +112,7 @@ just test-vm nixos-niri-dms-vm      # 构建 + 启动
 
 ```bash
 # 导入 WSL tarball（先在真机或 VM 上构建）
-just build .#nixos-wsl
+just os-build .#nixos-wsl
 tar -czf nixos-wsl.tar.gz -C "$(nix eval --raw .#nixosConfigurations.nixos-wsl.config.system.build.toplevel)" .
 wsl --import nixos-wsl C:\wsl\nixos-wsl nixos-wsl.tar.gz
 wsl -d nixos-wsl
@@ -127,7 +128,7 @@ nix-config/
 ├── CLAUDE.md              ← AI 助手上下文 + 常见坑
 ├── CONTEXT.md             ← 领域术语表 (与 den 官方术语表对齐)
 ├── modules/               ← 所有配置 (import-tree 自动扫描)
-│   ├── den.nix            ← den 接线 (flakeModule、namespace "lossilk"、默认、实体)
+│   ├── den.nix            ← den 接线 (flakeModule、namespace "lossilk"、默认)
 │   ├── schema/host/       ← den.schema.host 元数据接口
 │   ├── audio.nix          ← lossilk.audio (pipewire)
 │   ├── hosts/             ← 各 host 主切面 + host spec

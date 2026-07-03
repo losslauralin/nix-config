@@ -6,17 +6,20 @@
 #   - ./facter.json         硬件探测报告 (真机 sudo nixos-facter 生成)
 #   - nixos-hardware.*       机型通用调优
 # Windows NTFS 数据盘 (nvme1n1) 只用 udisks2 按需挂, 不进 disko.
-# 实体声明在 modules/den.nix
 {
   inputs,
   lossilk,
   ...
 }: {
-  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri.displays.eDP-1 = {
-    primary = true;
-    refresh = 240.0;
-    width = 2560;
-    height = 1600;
+  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri = {
+    users.loss = {};
+
+    displays.eDP-1 = {
+      primary = true;
+      refresh = 240.0;
+      width = 2560;
+      height = 1600;
+    };
   };
 
   den.aspects.mechrevo-nixos-dms-niri = {

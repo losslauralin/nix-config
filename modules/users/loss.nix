@@ -50,8 +50,10 @@
       <lossilk/dev/editors/helix> # Helix 模态编辑器
 
       # AI 辅助工具
-      <lossilk/ai/agents>
       <lossilk/ai/pi>
+
+      # security / networking
+      <lossilk/hacking>
       <lossilk/security/sops>
       <lossilk/security/bitwarden>
       <lossilk/networking/karing>

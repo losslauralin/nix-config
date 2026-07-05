@@ -10,12 +10,28 @@
     display = host.primaryDisplay;
   in {
     nixos = {
+      config,
       lib,
       pkgs,
       ...
     }: {
       boot.kernelModules = ["ntsync"];
       hardware.graphics.enable32Bit = true;
+
+      services.udev.packages = [
+        (pkgs.writeTextFile {
+          name = "ntsync-udev-rules";
+          text = ''KERNEL=="ntsync", MODE="0660", TAG+="uaccess"'';
+          destination = "/etc/udev/rules.d/70-ntsync.rules";
+        })
+      ];
+
+      assertions = [
+        {
+          assertion = lib.versionAtLeast config.boot.kernelPackages.kernel.version "6.14";
+          message = "lossilk.gaming._.min requires Linux 6.14+ for ntsync.";
+        }
+      ];
 
       environment.systemPackages = [
         pkgs.cartridges
@@ -107,6 +123,7 @@
     systemd.user.services.gpu-screen-recorder = {
       Unit.Description = "gpu-screen-recorder replay service";
       Install.WantedBy = ["graphical-session.target"];
+      Service.ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Videos/Replays";
       Service.ExecStart = "${lib.getExe pkgs.gpu-screen-recorder} -w portal -f 60 -r 60 -k av1 -a 'default_output' -a 'default_input' -c mp4 -q high -o %h/Videos/Replays -restore-portal-session yes -v no";
     };
   };

@@ -1,16 +1,8 @@
 # modules/hacking/default.nix
 #
 # Domain: 渗透攻防 — 安全工具箱核心
-{
-  inputs,
-  lossilk,
-  ...
-}: {
+{inputs, ...}: {
   lossilk.hacking = {
-    includes = [
-      lossilk.virt._.docker
-    ];
-
     nixos = {
       environment.etc.hosts.mode = "0644";
       programs.wireshark.enable = true;

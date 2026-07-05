@@ -1,7 +1,7 @@
 # modules/hosts/mechrevo-nixos-dms-niri/default.nix
 #
-# Host: mechrevo-nixos-dms-niri —— 真机 (MECHREVO 笔记本), niri + DankMaterialShell desktop.
-# 以 nixos-niri-dms-vm 为模板, 把 virt._.vm 占位换成真实硬件:
+# Host: mechrevo-nixos-dms-niri —— 真机 (MECHREVO 耀世 16 Pro GM6IX0B), niri + DankMaterialShell desktop.
+# 以 nixos-niri-dms-vm 为模板, 保留同一套用户应用/服务选择, 把 virt._.vm 换成真实硬件:
 #   - ./_disko.nix          声明式分区 (Btrfs-on-LUKS)
 #   - ./facter.json         硬件探测报告 (真机 sudo nixos-facter 生成)
 #   - nixos-hardware.*       机型通用调优
@@ -23,9 +23,14 @@
   };
 
   den.aspects.mechrevo-nixos-dms-niri = {
-    # 共享 niri + DMS desktop Profile / Bundle；本文件只追加真机 host spec。
+    # 与 nixos-niri-dms-vm 保持相同用户应用/服务能力; 只排除 virt._.vm。
     includes = with lossilk; [
       desktop._.niri-dms-desktop
+      ai._.axonhub._.local
+      desktop._.gui
+      desktop._.localsend
+      gaming._.max
+      security._.sops
       system._.boot._.plymouth # 图形启动画面 / quiet boot
       system._.filesystems._.ntfs # Windows 数据盘按需挂载支持
     ];
@@ -41,7 +46,7 @@
         inputs.nixos-hardware.nixosModules.common-pc-laptop-ssd # fstrim
       ];
 
-      # facter 硬件报告: availableKernelModules / microcode / Motorcomm dwmac 网卡等自动设
+      # facter 硬件报告: i7-14650HX / Intel Wi-Fi / Motorcomm YT6801 / NVIDIA AD107M 等。
       hardware.facter.reportPath = ./facter.json;
 
       # 单卡 NVIDIA RTX 4060 (Ada); facter 探测到卡但不启用驱动, 故手写:

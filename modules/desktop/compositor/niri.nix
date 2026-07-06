@@ -16,6 +16,7 @@
 {inputs, ...}: {
   lossilk.desktop._.compositor._.niri = {
     nixos = {
+      lib,
       pkgs,
       config,
       ...
@@ -26,7 +27,7 @@
       # greetd 自动启 niri-session; user 名由 host 主切面填 (因 user host-specific)
       services.greetd = {
         enable = true;
-        settings.default_session.command = "${config.programs.niri.package}/bin/niri-session";
+        settings.default_session.command = lib.mkDefault "${config.programs.niri.package}/bin/niri-session";
       };
 
       environment.systemPackages = with pkgs; [

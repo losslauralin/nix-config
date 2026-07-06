@@ -17,7 +17,7 @@
       (desktop._.appearance._.catppuccin "latte" "mauve")
       desktop._.browsers._.chrome
       desktop._.terminals._.kitty
-      desktop._.platform._.portal
+      desktop._.platform._.flatpak
       desktop._.compositor._.niri
       desktop._.shell._.dms
       desktop._.search._.dsearch

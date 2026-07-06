@@ -33,6 +33,8 @@
       security._.sops
       system._.boot._.plymouth # 图形启动画面 / quiet boot
       system._.filesystems._.ntfs # Windows 数据盘按需挂载支持
+      system._.peripherals._.bluetooth # 真机蓝牙外设支持
+      system._.power-mgmt # 笔记本电源 profile / thermal / upower
     ];
 
     nixos = _: {
@@ -68,8 +70,7 @@
       services.fwupd.enable = true; # 固件更新 (真机)
 
       nixpkgs.hostPlatform = "x86_64-linux";
-      # greetd 自动登录 loss 启 niri-session (command 在 desktop._.compositor._.niri.nixos 里设)
-      services.greetd.settings.default_session.user = "loss";
+      # DMS greeter 负责 greetd 登录界面与用户会话选择.
     };
 
     # user class 路由到 users.users.loss.extraGroups

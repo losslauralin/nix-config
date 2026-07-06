@@ -67,7 +67,9 @@ Arch dev host: `nix shell nixpkgs#just nixpkgs#nh -c '...'`
 
 2. **CLI tools vary by host** — Arch dev host lacks `nixos-rebuild`. Use `command -v <tool>` before running.
 
-3. **`host-aspects` is transitional** — Compare `flake.lock` den rev with upstream changes before modifying.
+3. **Do not scan `/nix/store` casually** — Except for focused debugging, do not run broad scans such as `rg` over `/nix/store` paths. Prefer repo files, official upstream references, or exact known source files.
+
+4. **`host-aspects` is transitional** — Compare `flake.lock` den rev with upstream changes before modifying.
 
 ## Documentation Map
 
@@ -76,17 +78,9 @@ Arch dev host: `nix shell nixpkgs#just nixpkgs#nh -c '...'`
 | Add/modify feature aspect | `docs/agents/adding-a-feature.md` + `docs/agents/den-configuration-patterns.md` |
 | Quick config pattern reference | `docs/agents/den-configuration-patterns.md` (practical patterns, validation, error prevention) |
 | Decide file/aspect placement | `CONTEXT.md` Modules Taxonomy |
-| Den semantic work | `docs/frameworks/den.md` + local `~/workspace/nix-ref/den/docs` |
+| Den semantic work | `docs/frameworks/den.md` + official upstream den docs when repo docs are insufficient |
 | CI / git-hooks / justfile chain | `modules/flake-parts/{git-hooks,formatter,devshell}.nix` + `.github/workflows/check.yml`; entry point `just help` |
 | Terminology authority | `CONTEXT.md` |
-
-## External References
-
-Local refs, not in repo git, directly readable:
-
-- `~/workspace/nix-ref/den` — den framework source
-- `~/workspace/nix-ref/nixconfig` — other NixOS den configs
-- `~/workspace/nix-ref/infra` — infrastructure config
 
 ## Style & Commits
 

@@ -1,7 +1,7 @@
 # Adding / Modifying Feature Aspects Guide
 
 > Mechanical flow for agents. Read `CONTEXT.md` and `docs/frameworks/den.md` first.
-> Upstream semantics authority: local `~/workspace/nix-ref/den/docs/src/content/docs/guides/configure-aspects.mdx`, `guides/mutual.mdx`.
+> Upstream semantics authority: official upstream den docs when repo docs are insufficient.
 >
 > **See also**: `den-configuration-patterns.md` — practical patterns, validation checkpoints, error prevention quick reference.
 
@@ -209,7 +209,7 @@ just fmt
 just check
 ```
 
-For host/desktop changes also run:
+Build a VM only when the VM output itself changed or runtime VM behavior must be verified:
 
 ```bash
 just build-vm nixos-niri-dms-vm

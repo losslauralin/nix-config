@@ -347,10 +347,10 @@ just fmt
 # 2. Check evaluation
 just check
 
-# 3. Desktop/GUI changes need extra validation
+# 3. Build VM only when the VM output/runtime behavior is part of the change
 just build-vm nixos-niri-dms-vm
 
-# 4. Interactive test (optional)
+# 4. Interactive VM test only when runtime VM behavior must be verified
 just test-vm nixos-niri-dms-vm
 ```
 
@@ -522,7 +522,7 @@ git add modules/<path>.nix && just check
 **Validation sequence**:
 ```bash
 just fmt && just check
-# Desktop changes add:
+# VM output/runtime changes add:
 just build-vm nixos-niri-dms-vm
 ```
 

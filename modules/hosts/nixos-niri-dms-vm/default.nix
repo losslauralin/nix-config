@@ -25,8 +25,7 @@
     # host spec nios class
     nixos = _: {
       nixpkgs.hostPlatform = "x86_64-linux";
-      # greetd 自动登录 loss 启 niri-session (command 在 desktop._.compositor._.niri.nixos 里设)
-      services.greetd.settings.default_session.user = "loss";
+      # DMS greeter 负责 greetd 登录界面与用户会话选择.
     };
 
     # user class 路由到 users.users.loss.extraGroups

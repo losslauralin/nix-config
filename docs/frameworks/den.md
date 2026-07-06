@@ -18,7 +18,7 @@ Does NOT apply to ordinary Nixpkgs package overrides, non-den shell scripts, or 
 ## Source priority
 
 1. **Repo semantic authority**: Read root `CONTEXT.md` first, then `docs/frameworks/den.md` current rules; for `modules/**/*.nix` placement or `lossilk.*` Aspect path, follow `CONTEXT.md` Modules Taxonomy / Cross-entity Delivery terminology.
-2. **den framework API / mental model**: Prefer reading local doc directory `/home/loss/workspace/nix-ref/den/docs`, especially:
+2. **den framework API / mental model**: Use the official upstream den documentation when repo docs are insufficient, especially:
    - `src/content/docs/overview.mdx`
    - `src/content/docs/explanation/core-principles.mdx`
    - `src/content/docs/explanation/aspects.mdx`
@@ -37,7 +37,7 @@ Does NOT apply to ordinary Nixpkgs package overrides, non-den shell scripts, or 
    - `src/content/docs/reference/batteries.mdx`
    - `src/content/docs/reference/schema.mdx`
    - `src/content/docs/reference/glossary.mdx`
-3. **den source**: Only read `/home/loss/workspace/nix-ref/den` source when local docs are missing, unclear, conflict with current repo behavior, or need to verify current lock rev's actual implementation. Don't wander source for general "understanding".
+3. **den source**: Only inspect the exact upstream source for the pinned den revision when official docs are missing, unclear, or conflict with current repo behavior. Do not use unpinned local mirrors as authority, and do not wander source for general "understanding".
 
 ## Must read before Den work
 
@@ -45,7 +45,7 @@ Before any Den-related implementation, read:
 
 - `CONTEXT.md`: This repo's terminology, avoid-words, Modules Taxonomy, Cross-entity Delivery.
 - Current section of this file + checklist below.
-- Necessary den local docs (especially `guides/configure-aspects.mdx`, `guides/mutual.mdx`, `explanation/core-principles.mdx`, `explanation/context-pipeline.mdx`, `explanation/parametric.mdx`, `explanation/class-modules.mdx`).
+- Necessary upstream den docs when repo docs are insufficient (especially `guides/configure-aspects.mdx`, `guides/mutual.mdx`, `explanation/core-principles.mdx`, `explanation/context-pipeline.mdx`, `explanation/parametric.mdx`, `explanation/class-modules.mdx`).
 
 If plan/implementation/review conflicts with these files, must explicitly note conflict and suggest `/grill-with-docs`; don't silently override existing terminology and decisions.
 
@@ -162,7 +162,7 @@ Before each Den-related implementation answer these questions:
 14. Added `modules/**/*.nix`? If so, already `git add`ed to ensure import-tree can scan?
 15. What validation command?
     - Doc/agent entry changes: `git diff --check`, declare no Nix evaluation-impacting files.
-    - Den module changes: at minimum `just check`; desktop/host changes also run `just build-vm nixos-niri-dms-vm` or `just test-vm nixos-niri-dms-vm`.
+    - Den module changes: at minimum `just fmt` and `just check`; build or run a VM only when VM outputs/runtime behavior or a shared desktop VM profile specifically needs verification. Host-only binding changes are sufficiently covered by evaluation.
     - Non-NixOS dev host: first `command -v just nh nix`, when lacking tools follow `CLAUDE.md` using `nix shell`.
 
 ## Red flags

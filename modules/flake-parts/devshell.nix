@@ -4,7 +4,7 @@
 #
 # This shell is for repo-local validation and inspection. It deliberately does
 # not provide deployment/rebuild tools (`nh`, `nixos-rebuild`, deploy-rs, sops,
-# ...); those belong to the target system/profile or are invoked explicitly.
+# ...); those belong to the target system or are invoked explicitly.
 #
 # Enter with `nix develop`.
 _: {

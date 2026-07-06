@@ -1,6 +1,6 @@
 # modules/desktop/shell/dms.nix
 #
-# lossilk.desktop._.shell._.dms - DankMaterialShell (互斥族 3 层 sub-aspect, host-locked)
+# lossilk.desktop._.shell._.dms - DankMaterialShell for niri (host-locked)
 #
 # quickshell-based shell. 接管 bar / 通知 / launcher / lockscreen / 控制中心 / powermenu /
 # notepad / processlist / night mode / clipboard manager (一整套生态).
@@ -26,10 +26,11 @@
 #   XF86Audio{Raise,Lower,Mute,MicMute}Volume → audio
 #   XF86MonBrightness{Up,Down}                 → brightness
 #
-# 跟 lossilk.desktop._.compositor._.niri base 的通用 binds (Mod+Q/H/J/K/L/1..9/Return/B/Print/...)
-# 无 key 冲突, 直接 attrset merge.
-_: {
+# Assumes niri: package override, greeter compositor, and IPC binds live here.
+{lossilk, ...}: {
   lossilk.desktop._.shell._.dms = {
+    includes = [lossilk.desktop._.compositor._.niri];
+
     nixos = {
       lib,
       pkgs,

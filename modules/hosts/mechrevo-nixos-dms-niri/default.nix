@@ -34,7 +34,7 @@
       system._.boot._.plymouth # 图形启动画面 / quiet boot
       system._.filesystems._.ntfs # Windows 数据盘按需挂载支持
       system._.peripherals._.bluetooth # 真机蓝牙外设支持
-      system._.power-mgmt # 笔记本电源 profile / thermal / upower
+      system._.power-mgmt # 笔记本电源模式 / thermal / upower
     ];
 
     nixos = _: {

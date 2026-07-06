@@ -1,6 +1,6 @@
 # modules/system/performance.nix
 #
-# 性能 profiles。具体策略仅通过子切面 opt-in；不声明空 root Aspect。
+# 性能调优。具体策略仅通过子切面 opt-in；不声明空 root Aspect。
 {lossilk, ...}: {
   lossilk.system._.performance._.responsive = {
     nixos.boot = {

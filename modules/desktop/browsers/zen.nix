@@ -1,6 +1,6 @@
 # modules/desktop/browsers/zen.nix
 #
-# BROWSER default selection is owned by an explicit profile/host/user route table.
+# 只安装 Zen; BROWSER 默认值由调用方设置.
 {inputs, ...}: {
   lossilk.desktop._.browsers._.zen.homeManager = {
     imports = [

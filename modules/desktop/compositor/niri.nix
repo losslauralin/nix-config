@@ -1,18 +1,13 @@
 # modules/desktop/compositor/niri.nix
 #
-# lossilk.desktop._.compositor._.niri - niri compositor (互斥族 3 层 namespace 容器,host-locked, shell-agnostic)
+# lossilk.desktop._.compositor._.niri - niri compositor base (host-locked)
 #
 # 用 sodiboo/niri-flake. nixos 层 enable niri 后, niri-flake 经 nixosModules.niri 自动
 # inject HM module 到 home-manager.users.<n>, 所以 HM 块直接写 programs.niri.settings
 # 即可, 不需要 imports = [inputs.niri.homeModules.config].
 #
-# 本 sub-aspect 是 shell-agnostic 基线: niri compositor 本身 + 通用美化 (圆角) + greetd
-# 自启. Shell 特异内容 (panel 拉起 / IPC binds / shell 自启 / shell-specific window
-# rules / shell-specific polkit 协调) 各 shell sub-aspect 自己贡献到 programs.niri.settings,
-# 由 nix 模块系统 merge 合到最终 niri 配置. 终端/浏览器启动命令从所选 desktop
-# leaf 的 home.sessionVariables seam 读取, niri 不绑定具体 implementation. host 主切面通过 includes 选用具体 shell:
-#   - desktop._.shell._.noctalia → Noctalia 接管
-#   - desktop._.shell._.dms      → DankMaterialShell 接管
+# 本 sub-aspect 只放 niri 基线: compositor、通用美化、greetd 自启。
+# shell 自启 / IPC binds / window-rules / polkit 协调由对应 shell 或桌面路线补上。
 {inputs, ...}: {
   lossilk.desktop._.compositor._.niri = {
     nixos = {
@@ -92,13 +87,12 @@
           }
         ];
 
-        # 通用自启项. shell 自启留给各 shell sub-aspect 自己决定 (Noctalia 走 niri
-        # spawn-at-startup, DMS 走 systemd user service).
+        # 通用自启项; shell 自启由对应 shell 或桌面路线决定.
         spawn-at-startup = [
           {command = ["xwayland-satellite"];}
         ];
 
-        # niri 通用 binds (shell-agnostic). 注意避开各 shell 占用键:
+        # niri 通用 binds. 注意避开 shell 占用键:
         #   Mod+Space / Mod+S / Mod+Comma (Noctalia 用),
         #   Mod+V / Mod+Escape           (DMS 用),
         #   XF86Audio* / XF86MonBrightness* (各 shell 自己接).

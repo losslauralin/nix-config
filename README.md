@@ -1,7 +1,5 @@
 # nix-config
 
-[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md) [![简体中文](https://img.shields.io/badge/lang-简体中文-red.svg)](README_CN.md)
-
 My NixOS config. It uses [denful/den](https://github.com/denful/den), so most features live as aspects that hosts and users opt into. The repo currently covers a MECHREVO laptop, two QEMU VMs, and a WSL2 shell.
 
 ## Quick Start
@@ -20,7 +18,7 @@ just diff <host>                        # nvd diff: /run/current-system vs new b
 just help                               # just -l — full recipe list
 ```
 
-> On Arch: wrap with `nix shell nixpkgs#just nixpkgs#nh -c 'just ...'`. See [AGENTS.md](AGENTS.md) footgun #2.
+> On a common Linux distro: wrap with `nix shell nixpkgs#just nixpkgs#nh -c 'just ...'` when `just` or `nh` is not already available.
 
 `flake.nix` is hand-written. To add an input, add it to the `inputs` attrset, import it from the module that needs it, then run `nix flake lock`. `vic/flake-file` is gone; its input/module sync fought with strict Nix module evaluation.
 
@@ -37,7 +35,7 @@ After cloning, run `nix develop` once to install the pre-commit hooks.
 
 ## Architecture
 
-Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: named chunks of config that can emit NixOS, Home Manager, user, or other classes. A host's entity and its primary aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). The folder layout follows the concern-first taxonomy in `CONTEXT.md`.
+Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: named chunks of config that can emit NixOS, Home Manager, user, or other classes. A host's entity and its primary aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). Project language and ownership routing live in `CONTEXT-MAP.md`; most `modules/` directory names are mutable category shelves, not bounded contexts.
 
 ```
 modules/
@@ -73,8 +71,8 @@ CI runs the full `nix flake check`. It cannot use `--no-build` because the catpp
 
 | Rule | Why |
 |------|-----|
-| `den.default` = framework defaults only | `stateVersion`, `allowUnfree`, and the `define-user`/`hostname` pipeline. No desktop profile, no app bundle; `host-aspects` is user opt-in. |
-| Profiles are explicit | Hosts include reusable recipes or profiles directly, for example `lossilk.desktop._.niri-dms-desktop`. |
+| `den.default` = framework defaults only | `stateVersion`, `allowUnfree`, and the `define-user`/`hostname` pipeline. No desktop route, no app bundle; `host-aspects` is user opt-in. |
+| Glue aspects are explicit | Hosts include supported route glue directly, for example `lossilk.desktop._.niri-dms-desktop`. This is still an ordinary Den aspect, not a separate primitive. |
 | One concern per aspect, unless it is genuinely tiny | Coreutils replacements (`bat`/`eza`/`fd`/`ripgrep`) live together in `cli/utils.nix`; configured tools (`fzf`/`yazi`/`zoxide`) get their own file. |
 | Cross-platform → user aspect; host-locked → host aspect | Shell tools go in `lossilk.cli._.*`, platform configs in `lossilk.virt`, hardware specs inline in host `nixos` block. |
 
@@ -149,7 +147,7 @@ nix-config/
 ├── flake.lock
 ├── justfile               ← task runner (just check/build/switch/fmt/update/…)
 ├── CLAUDE.md              ← AI assistant context + footguns
-├── CONTEXT.md             ← domain glossary (aligned with den's glossary)
+├── CONTEXT-MAP.md         ← project context map and canonical terminology
 ├── modules/               ← all config (auto-scanned by import-tree)
 │   ├── den.nix            ← den wiring (flakeModule, namespace "lossilk", defaults)
 │   ├── schema/host/       ← den.schema.host metadata interfaces
@@ -159,7 +157,7 @@ nix-config/
 │   ├── system/            ← OS substrate and lifecycle
 │   ├── networking/        ← network concern, including SSH
 │   ├── cli/               ← lossilk.cli._.*
-│   ├── desktop/           ← desktop concern shelves
+│   ├── desktop/           ← desktop module category shelf
 │   ├── dev/               ← lossilk.dev._.*
 │   ├── security/  virt/  ai/
 │   └── flake-parts/       ← formatter.nix, git-hooks.nix, devshell.nix, deploy

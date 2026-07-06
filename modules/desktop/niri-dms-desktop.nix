@@ -1,10 +1,9 @@
 # modules/desktop/niri-dms-desktop.nix
 #
-# lossilk.desktop._.niri-dms-desktop —— Profile / Bundle for hosts that run niri + DankMaterialShell.
-# Owns only the stable Includes route table; VM / hardware / disk facts stay in host specs.
+# lossilk.desktop._.niri-dms-desktop —— niri + DankMaterialShell desktop.
+# VM / hardware / disk facts stay in host specs.
 #
-# include 引用风格:本文件用 attrpath 风格(`with lossilk; desktop._.foo`)。
-# 仓库约定见 docs/agents/adding-a-feature.md —— 新文件优先 attrpath 风格,
+# include 引用风格:本文件用 attrpath 风格(`with lossilk; desktop._.foo`);
 # angle-bracket(`<lossilk/...>`)仅 modules/users/loss.nix 等既有文件保留。
 {lossilk, ...}: {
   lossilk.desktop._.niri-dms-desktop = {

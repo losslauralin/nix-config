@@ -1,6 +1,6 @@
 # modules/desktop/shell/noctalia.nix
 #
-# lossilk.desktop._.shell._.noctalia - Noctalia (互斥族 3 层 sub-aspect, host-locked)
+# lossilk.desktop._.shell._.noctalia - Noctalia for niri (candidate)
 #
 # quickshell-based shell, 接管 bar / 通知 / launcher / lockscreen.
 # 跟 DMS 区别: Noctalia 不提供 niri-specific HM 集成 (没 enableSpawn/enableKeybinds),
@@ -20,10 +20,15 @@
 # i18n 现状 (2026-05-24): noctalia v5 share/noctalia/assets/translations/ **只有 en.json**.
 # shell.lang 设非 en 都会 fallback English. 修法只能给 upstream 提翻译 PR.
 #
-# niri 集成内容 (binds / spawn / window-rules / polkit 协调) 全部在本文件贡献, niri base
-# 保持 shell-agnostic. host 选 noctalia 通过 includes desktop._.shell._.noctalia 一次性带过来.
-{inputs, ...}: {
+# niri 集成内容 (binds / spawn / window-rules / polkit 协调) 全部在本文件贡献。
+{
+  inputs,
+  lossilk,
+  ...
+}: {
   lossilk.desktop._.shell._.noctalia = {
+    includes = [lossilk.desktop._.compositor._.niri];
+
     # Noctalia 自己有 polkit, 禁掉 niri-flake polkit 避免双 polkit prompt
     nixos = {
       systemd.user.services.niri-flake-polkit.enable = false;
@@ -46,7 +51,7 @@
         };
       };
 
-      # niri 集成 (从 lossilk.desktop._.niri base 搬出, 让 niri base shell-agnostic)
+      # niri 集成
       # 走 programs.niri.settings 贡献, nix 模块系统跟 niri base 的设置自动合 (list concat / attrset merge).
       programs.niri.settings = {
         # Noctalia 自己 Settings 窗口浮动 + 固定尺寸 (官方推荐)

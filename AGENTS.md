@@ -16,6 +16,8 @@ Local namespace: `lossilk` in `modules/den.nix`.
 - Use `just help` to discover the current command surface.
 - Use `just check` after changes that affect Nix evaluation or Den wiring.
 - Use `nix develop` for the normal local maintenance shell.
+- When using `rg`, always include `--glob '!/nix/store/**'`. Never pass `/nix/store` as an `rg` root or include it through another glob.
+- When searching Nixpkgs packages or NixOS/Home Manager options, use `nh search packages <query>` or `nh search options [--scope=<SCOPE>] <query>` (`--scope`: `nixpkgs`, `home-manager`, `all`). These commands search via search.nixos.org; never use information from `/nix/store/**` for package or option lookup.
 
 ## Editing Boundaries
 
@@ -43,5 +45,6 @@ Direct modification is allowed:
 ## Pitfalls
 
 - New `modules/**/*.nix` files must be `git add`ed before evaluation; import-tree only scans git-tracked files.
-- Do not broad-scan `/nix/store`. Prefer repo files, official upstream docs, or exact known store/source paths.
+- Absolute `/nix/store/**` boundary: do not read, list, grep, open, search, evaluate, inspect, or otherwise query any data under `/nix/store/**`, in any scenario. This includes exact known store paths, package sources, module sources, docs, generated files, and debugging shortcuts.
+- If an agent is about to query `/nix/store/**`, treat that as a hallucination-risk event: stop immediately, report the attempted action, and wait for user direction. If an agent already queried `/nix/store/**`, the session is considered invalid and must be interrupted.
 - Do not move the repo toward upstream example layouts like `modules/aspects/...` just because Den examples use them.

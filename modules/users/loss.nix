@@ -48,6 +48,7 @@
       <lossilk/dev/editors/neovim> # 默认编辑器 + EDITOR/VISUAL
       <lossilk/dev/editors/emacs> # Emacs 编辑器
       <lossilk/dev/editors/helix> # Helix 模态编辑器
+      <lossilk/dev/editors/zed> # Zed GUI 编辑器
 
       # AI 辅助工具
       <lossilk/ai/pi>

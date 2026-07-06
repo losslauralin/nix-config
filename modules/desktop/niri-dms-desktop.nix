@@ -17,6 +17,7 @@
       desktop._.browsers._.chrome
       desktop._.terminals._.kitty
       desktop._.platform._.flatpak
+      desktop._.input._.fcitx5-rime-wanxiang
       desktop._.compositor._.niri
       desktop._.shell._.dms
       desktop._.search._.dsearch

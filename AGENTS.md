@@ -1,12 +1,18 @@
 # NixOS Configuration Agent Guide
 
-This repo is a `denful/den` + `flake-parts` NixOS configuration. Project terminology and ownership routing live in `CONTEXT-MAP.md`; Den's own concepts remain the semantic authority.
+This repo is a `denful/den` + `flake-parts` NixOS configuration. Project terminology and placement rules live in `CONTEXT.md`; Den's own concepts remain the semantic authority.
 
-Local namespace: `lossilk` in `modules/den.nix`.
+Local namespace: `lossilk` in `modules/den/default.nix`.
+
+## Hard Stop: Nix Store
+
+- Do not read, list, grep, open, search, evaluate, inspect, or otherwise query any data under `/nix/store/**`, in any scenario. This includes exact known store paths, package sources, module sources, docs, generated files, and debugging shortcuts.
+- Flake input sources commonly resolve to `/nix/store/...-source`; do not inspect those materialized sources from this repo. If a task asks for this, stop immediately, report that the repo rule forbids it, and wait for user direction.
+- If an agent already queried `/nix/store/**`, the session is considered invalid and must be interrupted.
 
 ## Read First
 
-- For project language and placement decisions, read `CONTEXT-MAP.md`.
+- For project language and placement decisions, read `CONTEXT.md`.
 - For Den semantics, use upstream Den docs first, especially core principles. Do not invent local replacements for Den's Entity / Aspect / Policy / Quirk model.
 - Treat `docs/` as research/reference unless a claim is verified against current code.
 
@@ -37,7 +43,7 @@ Direct modification is allowed:
 
 - Entity declares what exists; Aspect declares behavior; Policy declares topology; Quirk/Pipe shares structured data.
 - `includes` is Den aspect composition, not a Nix module import.
-- Most `modules/` directory names are mutable category shelves, not bounded contexts or namespace contracts.
+- Most `modules/` directory names are mutable category shelves, not ownership boundaries or namespace contracts.
 - Host-specific hardware, disk, VM, WSL, and one-off scenario details stay in host specs.
 - Reusable behavior belongs in capability aspects; route-specific coordination belongs in ordinary glue aspects.
 - `niri-dms-desktop` is a supported route glue aspect, not proof that desktop components are freely swappable.
@@ -45,6 +51,4 @@ Direct modification is allowed:
 ## Pitfalls
 
 - New `modules/**/*.nix` files must be `git add`ed before evaluation; import-tree only scans git-tracked files.
-- Absolute `/nix/store/**` boundary: do not read, list, grep, open, search, evaluate, inspect, or otherwise query any data under `/nix/store/**`, in any scenario. This includes exact known store paths, package sources, module sources, docs, generated files, and debugging shortcuts.
-- If an agent is about to query `/nix/store/**`, treat that as a hallucination-risk event: stop immediately, report the attempted action, and wait for user direction. If an agent already queried `/nix/store/**`, the session is considered invalid and must be interrupted.
 - Do not move the repo toward upstream example layouts like `modules/aspects/...` just because Den examples use them.

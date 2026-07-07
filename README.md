@@ -35,12 +35,13 @@ After cloning, run `nix develop` once to install the pre-commit hooks.
 
 ## Architecture
 
-Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: named chunks of config that can emit NixOS, Home Manager, user, or other classes. A host's entity and its primary aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). Project language and ownership routing live in `CONTEXT-MAP.md`; most `modules/` directory names are mutable category shelves, not bounded contexts.
+Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: named chunks of config that can emit NixOS, Home Manager, user, or other classes. A host's entity and its primary aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). Project language and placement rules live in `CONTEXT.md`; most `modules/` directory names are mutable category shelves, not ownership boundaries.
 
 ```
 modules/
-├── den.nix              ← den wiring, namespace "lossilk", framework defaults
-├── schema/host/         ← den.schema.host metadata interfaces (display facts, etc.)
+├── den/                 ← den wiring plus den.schema.* metadata interfaces
+│   ├── default.nix      ← flakeModule, namespace "lossilk", framework defaults
+│   └── schema/host/     ← den.schema.host metadata interfaces (display facts, etc.)
 ├── hosts/               ← per-host main aspects and host specs
 ├── users/               ← per-user main aspects
 ├── system/              ← OS substrate: boot, filesystems, peripherals, power, XDG
@@ -127,7 +128,7 @@ just test-vm nixos-niri-dms-vm      # build + boot
 
 Edit host config -> `just build-vm` -> `just run-vm` -> iterate, then deploy to bare metal when stable.
 
-> When creating a new VM host, remember `git add` for new files (import-tree only scans git-tracked files — footgun #1 in CLAUDE.md).
+> When creating a new VM host, remember `git add` for new files (import-tree only scans git-tracked files — footgun #1 in AGENTS.md).
 
 ## Install (WSL2)
 
@@ -146,11 +147,12 @@ nix-config/
 ├── flake.nix              ← hand-written (see ADR 0005)
 ├── flake.lock
 ├── justfile               ← task runner (just check/build/switch/fmt/update/…)
-├── CLAUDE.md              ← AI assistant context + footguns
-├── CONTEXT-MAP.md         ← project context map and canonical terminology
+├── AGENTS.md              ← AI assistant context + footguns
+├── CONTEXT.md             ← project context and canonical terminology
 ├── modules/               ← all config (auto-scanned by import-tree)
-│   ├── den.nix            ← den wiring (flakeModule, namespace "lossilk", defaults)
-│   ├── schema/host/       ← den.schema.host metadata interfaces
+│   ├── den/               ← den wiring plus den.schema.* metadata interfaces
+│   │   ├── default.nix    ← flakeModule, namespace "lossilk", defaults
+│   │   └── schema/host/   ← den.schema.host metadata interfaces
 │   ├── audio.nix          ← lossilk.audio (pipewire)
 │   ├── hosts/             ← per-host main aspects + host specs
 │   ├── users/             ← per-user main aspects

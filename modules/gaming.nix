@@ -96,7 +96,6 @@
       };
 
       environment.systemPackages = [
-        pkgs.deadlock-mod-manager
         pkgs.goverlay
         pkgs.gpu-screen-recorder-gtk
         pkgs.lsfg-vk

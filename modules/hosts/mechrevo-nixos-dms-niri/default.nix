@@ -11,7 +11,8 @@
   lossilk,
   ...
 }: {
-  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri = {
+  den.aspects.mechrevo-nixos-dms-niri = {
+    # 与 nixos-niri-dms-vm 保持相同用户应用/服务能力; 只排除 virt._.vm。
     users.loss = {};
 
     displays.eDP-1 = {
@@ -20,10 +21,6 @@
       width = 2560;
       height = 1600;
     };
-  };
-
-  den.aspects.mechrevo-nixos-dms-niri = {
-    # 与 nixos-niri-dms-vm 保持相同用户应用/服务能力; 只排除 virt._.vm。
     includes = with lossilk; [
       desktop._.niri-dms-desktop
       ai._.axonhub._.local

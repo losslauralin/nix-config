@@ -1,26 +1,37 @@
-# Context Map
+# Project Context
 
-This file is the routing document for project language and ownership. The existing `docs/` tree is reference material: use it as research input, but verify claims against `modules/`, `flake.nix`, and current framework behavior before treating them as project truth.
+This repo is a personal NixOS and Home Manager configuration built on `denful/den` and `flake-parts`. Its project language is configuration semantics: hosts, users, aspects, supported routes, validation, and agent-safe maintenance.
 
-## Contexts
+This is not a product codebase with front-end/back-end layers, product requirements, or a product issue workflow. Use this file as the single project context and glossary for placement decisions and terminology.
 
-- [Den Configuration](https://den.denful.dev/explanation/core-principles/) - owns framework language, aspect composition rules, entity/class boundaries, policies, quirks, batteries, and namespace conventions. Upstream Den concepts are the semantic authority; this repo should use Den's model rather than wrap it in a parallel local model.
-- [Entity Model](./modules/) - owns concrete host/user entities, host specs, schema attributes, and each entity's primary aspect route table.
-- [Capability Catalog](./modules/) - owns reusable aspects delivered to hosts or users. Most `modules/` directory names are mutable category shelves, not stable bounded contexts.
-- [Research Docs](./docs/) - preserves prior research, agent notes, and reference summaries; it does not own live configuration semantics.
+## Sources Of Truth
 
-## Relationships
+- Upstream Den docs own framework semantics: entities, aspects, classes, policies, quirks, batteries, namespace conventions, and `includes` composition.
+- `modules/`, `flake.nix`, and current evaluation behavior own live configuration truth.
+- `docs/` preserves research, reference material, and agent notes. It can inform decisions, but it is not authoritative until verified against live code.
+- Durable architecture decisions belong under `docs/adr/` when a decision is surprising, hard to reverse, and has real alternatives.
 
-- **Entity Model -> Den Configuration**: Hosts and users are declared and resolved using Den's entity/aspect/class model.
-- **Entity Model -> Capability Catalog**: Entity primary aspects include reusable capabilities and supported Glue Aspects; host-specific hardware and scenario details stay in entity-owned specs.
-- **Capability Catalog -> Den Configuration**: Reusable capabilities must still respect Den terminology, aspect composition rules, and class boundaries.
-- **Den Configuration -> All Contexts**: Do not bypass Den's prescribed mechanisms with local substitutes; use entities for data, aspects for behavior, policies for topology, quirks/pipes for structured sharing, and `includes` for composition.
-- **Research Docs -> All Contexts**: Research docs can inform decisions, but code and this map resolve conflicts.
+## Placement Rules
+
+- Use Den's model directly. Do not wrap entities, aspects, policies, quirks, or batteries in a parallel local architecture model.
+- Hosts and users are declared as entities. Their primary aspects define their route through reusable configuration.
+- Host-specific hardware, disk, VM, WSL, image, and one-off scenario details stay in host specs.
+- Reusable behavior belongs in capability aspects.
+- Route-specific coordination belongs in ordinary glue aspects.
+- Most `modules/` directory names are mutable category shelves for discoverability, not stable ownership boundaries or namespace contracts.
+- The supported desktop route is explicit. Do not infer that compositor, shell, launcher, portal, greeter, search, and IPC bindings are freely swappable unless a verified glue aspect proves that route.
+
+## Validation
+
+- Prefer `just` recipes over raw `nix`, `nh`, or `nixos-rebuild` commands when a recipe exists.
+- Use `just fmt-check` for formatting and static lint checks.
+- Use `just check` or `just check-all` when changes affect Nix evaluation, Den wiring, flake outputs, or shared configuration behavior.
+- Use targeted builds such as `just build-vm <host>`, `just os-build .#<host>`, or `just diff <host>` when a change has host-specific risk.
 
 ## Language
 
-**Context Map**: The root routing document for bounded contexts, relationships, and canonical project terms.
-_Avoid_: context notes, research summary
+**Project Context**: This file: the single project context, terminology, and placement guide.
+_Avoid_: context map, bounded context map, product context
 
 **Research Docs**: Prior notes and references under `docs/` that are useful background but not authoritative by themselves.
 _Avoid_: source of truth, live spec
@@ -37,8 +48,8 @@ _Avoid_: reusable module, profile
 **User**: A Den user entity and its primary personal aspect, currently centered on `loss`.
 _Avoid_: account, person
 
-**Module Category**: A mutable physical shelf under `modules/` used for discoverability, such as `desktop`, `dev`, or `networking`; it is not automatically a bounded context.
-_Avoid_: domain boundary, namespace contract
+**Module Category**: A mutable physical shelf under `modules/` used for discoverability, such as `desktop`, `dev`, or `networking`; it is not automatically an ownership boundary.
+_Avoid_: bounded context, domain boundary, namespace contract
 
 **Aspect**: A composable Den configuration unit that declares behavior and may emit class modules.
 _Avoid_: NixOS module, import
@@ -90,6 +101,3 @@ _Avoid_: shared option, global variable
 
 **Battery**: A reusable Den-provided pattern such as `primary-user`, `user-shell`, `host-aspects`, or `hostname`.
 _Avoid_: profile, feature aspect
-
-**ADR Location**: Durable architecture decisions live under `docs/adr/` when a decision is hard to reverse, surprising without context, and has real alternatives.
-_Avoid_: burying decisions in comments

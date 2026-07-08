@@ -35,7 +35,7 @@ After cloning, run `nix develop` once to install the pre-commit hooks.
 
 ## Architecture
 
-Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: named chunks of config that can emit NixOS, Home Manager, user, or other classes. A host's entity and its primary aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). Project language and placement rules live in `CONTEXT.md`; most `modules/` directory names are mutable category shelves, not ownership boundaries.
+Den splits config into **entities** (`host`, `user`, `home`) and **aspects**: attrsets containing modules for one or more Nix classes, such as NixOS, Home Manager, or user. A host's entity and its generated aspect live together in `modules/hosts/<host>/default.nix`; the name does the binding (`den.aspects.<entity-name>`). Project language and placement rules live in `CONTEXT.md`; most `modules/` directory names are mutable category shelves, not ownership boundaries.
 
 ```
 modules/

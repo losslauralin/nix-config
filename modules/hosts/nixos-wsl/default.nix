@@ -1,5 +1,3 @@
-# modules/hosts/nixos-wsl/default.nix
-#
 # Host: nixos-wsl —— WSL2 NixOS 主机实体 + 主切面
 {lossilk, ...}: {
   den.hosts.x86_64-linux.nixos-wsl = {

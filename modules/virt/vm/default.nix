@@ -1,5 +1,3 @@
-# modules/virt/vm/default.nix
-#
 # lossilk.virt._.vm - qemu VM guest 配置 (sub-aspect, host-locked)
 #
 # 通用 qemu guest 设置 (跨多 VM host 可复用), vmVariant 内调资源 + 转发端口 + 开 sshd.

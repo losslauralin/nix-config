@@ -1,11 +1,7 @@
-# modules/dev/git/git.nix
-#
-# lossilk.dev._.git —— 完整 git 栈: core + gh (GitHub CLI) + lazygit (TUI)
 {
   lossilk.dev._.git = {
     homeManager = {
       programs = {
-        # GitHub CLI
         gh = {
           enable = true;
           settings = {
@@ -18,7 +14,6 @@
           };
         };
 
-        # TUI Git 客户端
         lazygit.enable = true;
 
         difftastic.enable = true;

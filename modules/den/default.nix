@@ -1,5 +1,3 @@
-# modules/den/default.nix
-#
 # Den 主入口 —— 框架接线、namespace、全局默认。
 {
   inputs,

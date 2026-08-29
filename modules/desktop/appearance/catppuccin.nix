@@ -1,6 +1,3 @@
-# modules/desktop/appearance/catppuccin.nix
-#
-# Catppuccin 配色主题声明
 {
   inputs,
   lib,

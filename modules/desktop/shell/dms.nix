@@ -1,5 +1,3 @@
-# modules/desktop/shell/dms.nix
-#
 # lossilk.desktop._.shell._.dms - DankMaterialShell for niri (host-locked)
 #
 # quickshell-based shell. 接管 bar / 通知 / launcher / lockscreen / 控制中心 / powermenu /

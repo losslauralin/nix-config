@@ -1,4 +1,3 @@
-# lossilk.cli._.utils — coreutils/uutils 替代 + 杂项 enable-only
 {
   lossilk.cli._.utils.homeManager = {
     pkgs,
@@ -26,7 +25,6 @@
     ];
 
     programs = {
-      # coreutils 替代
       bat = {
         enable = true;
         config.theme = lib.mkDefault "TwoDark";
@@ -50,7 +48,6 @@
         ];
       };
 
-      # 杂项
       bottom.enable = true; # btop 替代，TUI 进程/系统监控
       tealdeer = {
         enable = true; # tldr 客户端，简化版 man pages

@@ -1,6 +1,3 @@
-# modules/dev/editors/helix.nix
-#
-# Helix — 模态编辑器。Neovim 仍是当前仓库默认编辑器，除非未启用。
 {lossilk, ...}: {
   lossilk.dev._.editors._.helix = {
     homeManager = {lib, ...}: {

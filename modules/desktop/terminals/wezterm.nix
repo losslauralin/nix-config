@@ -1,4 +1,3 @@
-# modules/desktop/terminals/wezterm.nix
 {
   lossilk.desktop._.terminals._.wezterm = {
     homeManager = {

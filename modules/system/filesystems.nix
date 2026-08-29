@@ -1,4 +1,3 @@
-# lossilk.system._.filesystems — 文件系统辅助工具
 {
   lossilk.system._.filesystems.nixos = {pkgs, ...}: {
     environment.systemPackages = [

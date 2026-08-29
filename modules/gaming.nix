@@ -1,6 +1,3 @@
-# modules/gaming.nix
-#
-# Domain: 游戏圈子 — Steam/Lutris 等集成开关
 {
   inputs,
   lossilk,

@@ -1,6 +1,3 @@
-# modules/dev/editors/neovim.nix
-#
-# Neovim — 默认编辑器 (CLI, nixpkgs: development/tools/misc)
 # EDITOR/VISUAL 环境变量在此声明 (系统级编辑器选择).
 {
   lossilk.dev._.editors._.neovim.homeManager = {

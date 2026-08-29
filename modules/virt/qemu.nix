@@ -1,6 +1,3 @@
-# modules/virt/qemu.nix
-#
-# QEMU/libvirt 桌面虚拟化。仅 host opt-in。
 {
   lossilk.virt._.qemu = {
     nixos = {pkgs, ...}: {

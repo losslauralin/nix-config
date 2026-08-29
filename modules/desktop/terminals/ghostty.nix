@@ -1,4 +1,3 @@
-# modules/desktop/terminals/ghostty.nix
 {
   lossilk.desktop._.terminals._.ghostty.homeManager = {
     programs.ghostty = {

@@ -1,5 +1,3 @@
-# modules/virt/wsl.nix
-#
 # lossilk.virt._.wsl - WSL 通用切面 (任何 WSL host 都能引)
 #
 # 注: den.batteries.wsl 由 host 实体的 `wsl.enable = true` 触发, 已自动:

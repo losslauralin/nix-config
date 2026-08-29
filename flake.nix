@@ -9,7 +9,6 @@
   };
 
   inputs = {
-    # Core
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -18,7 +17,6 @@
     import-tree.url = "github:vic/import-tree";
     den.url = "github:denful/den";
 
-    # NixOS / system
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,7 +29,6 @@
     nixos-facter-modules.url = "github:numtide/nixos-facter-modules";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
-    # Build tooling
     arion = {
       url = "github:hercules-ci/arion";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -58,10 +55,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.nix-index-database.follows = "nix-index-database";
     };
-    emacs-overlay = {
-      url = "github:nix-community/emacs-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     llm-agents = {
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -69,7 +62,6 @@
       inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Desktop
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -97,14 +89,12 @@
       inputs.flake-parts.follows = "flake-parts";
     };
 
-    # Deploy
     make-shell.url = "github:nicknovitski/make-shell";
     deploy-rs = {
       url = "github:serokell/deploy-rs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Secrets
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -1,5 +1,3 @@
-# modules/desktop/niri-dms-desktop.nix
-#
 # lossilk.desktop._.niri-dms-desktop —— niri + DankMaterialShell desktop.
 # VM / hardware / disk facts stay in host specs.
 #

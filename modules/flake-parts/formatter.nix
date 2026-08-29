@@ -1,6 +1,3 @@
-# modules/flake-parts/formatter.nix
-#
-# Formatter configuration using treefmt-nix
 {inputs, ...}: {
   imports = [
     inputs.treefmt-nix.flakeModule
@@ -11,7 +8,6 @@
       projectRootFile = "flake.nix";
 
       programs = {
-        # Nix
         alejandra.enable = true;
         deadnix = {
           enable = true;
@@ -20,29 +16,22 @@
         };
         statix.enable = true;
 
-        # Shell
         shfmt.enable = true;
         shellcheck.enable = true;
 
-        # Rust
         rustfmt.enable = true;
 
-        # Python
         black.enable = true;
         ruff-format.enable = true;
         ruff-check.enable = true;
 
-        # Go
         gofmt.enable = true;
         gofumpt.enable = true;
 
-        # JavaScript/TypeScript
         biome.enable = true;
 
-        # Just
         just.enable = true;
 
-        # General
         yamlfmt.enable = true;
         jsonfmt.enable = true;
       };

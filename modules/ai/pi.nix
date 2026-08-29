@@ -1,6 +1,3 @@
-# modules/ai/pi.nix
-#
-# Pi coding agent 配置
 {inputs, ...}: {
   lossilk.ai._.pi.homeManager = {
     pkgs,

@@ -1,5 +1,3 @@
-# modules/desktop/compositor/niri.nix
-#
 # lossilk.desktop._.compositor._.niri - niri compositor base (host-locked)
 #
 # 用 sodiboo/niri-flake. nixos 层 enable niri 后, niri-flake 经 nixosModules.niri 自动

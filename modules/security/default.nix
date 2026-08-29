@@ -1,6 +1,3 @@
-# modules/security/default.nix
-#
-# 安全加固层 — 基础安全规则
 {
   lossilk.security.nixos.security = {
     polkit.enable = true;

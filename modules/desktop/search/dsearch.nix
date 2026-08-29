@@ -1,5 +1,3 @@
-# modules/desktop/search/dsearch.nix
-#
 # lossilk.desktop._.search._.dsearch - DankSearch desktop search backend
 #
 # 本地文件索引 + HTTP API daemon (default :43654). NixOS 模块自动建 systemd user service

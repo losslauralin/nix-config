@@ -1,6 +1,3 @@
-# modules/virt/docker.nix
-#
-# Docker 运行时。仅 host opt-in。
 {
   lossilk.virt._.docker = {
     nixos = {

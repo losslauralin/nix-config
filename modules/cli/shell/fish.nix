@@ -1,6 +1,3 @@
-# modules/cli/shell/fish.nix
-#
-# fish Selection Variant —— 选择 fish 同时带上 shell Family Root 与 user-shell battery。
 {
   den,
   lossilk,

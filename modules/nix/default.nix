@@ -1,6 +1,3 @@
-# modules/nix/default.nix
-#
-# lossilk.nix —— Nix 域底座: nix.conf 核心微调 (daemon 设置 / GC / substituters)
 let
   substituters = [
     "https://mirrors.ustc.edu.cn/nix-channels/store"

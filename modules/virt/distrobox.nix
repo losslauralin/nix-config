@@ -1,4 +1,3 @@
-# modules/virt/distrobox.nix
 {lossilk, ...}: {
   lossilk.virt._.distrobox = {
     includes = [

@@ -1,4 +1,3 @@
-# modules/desktop/platform/flatpak.nix
 {lossilk, ...}: {
   lossilk.desktop._.platform._.flatpak = {
     includes = [

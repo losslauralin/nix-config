@@ -1,5 +1,3 @@
-# modules/hosts/mechrevo-nixos-dms-niri/default.nix
-#
 # Host: mechrevo-nixos-dms-niri —— 真机 (MECHREVO 耀世 16 Pro GM6IX0B), niri + DankMaterialShell desktop.
 # 以 nixos-niri-dms-vm 为模板, 保留同一套用户应用/服务选择, 把 virt._.vm 换成真实硬件:
 #   - ./_disko.nix          声明式分区 (Btrfs-on-LUKS)

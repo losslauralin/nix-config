@@ -1,6 +1,3 @@
-# modules/cli/shell/zsh.nix
-#
-# zsh Selection Variant —— 选择 zsh 同时带上 shell Family Root 与 user-shell battery。
 {
   den,
   lossilk,

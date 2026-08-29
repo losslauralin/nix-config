@@ -1,4 +1,3 @@
-# modules/dev/git/jujutsu.nix
 {
   lossilk.dev._.git._.jujutsu.homeManager = {pkgs, ...}: {
     home.shellAliases.jji = "jj --ignore-immutable";

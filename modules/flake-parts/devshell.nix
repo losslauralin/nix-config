@@ -1,5 +1,3 @@
-# modules/flake-parts/devshell.nix
-#
 # Devshell for maintaining this nix-config repo.
 #
 # This shell is for repo-local validation and inspection. It deliberately does

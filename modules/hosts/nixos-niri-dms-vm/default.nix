@@ -1,5 +1,3 @@
-# modules/hosts/nixos-niri-dms-vm/default.nix
-#
 # Host: nixos-niri-dms-vm —— qemu VM, 验证 niri + DankMaterialShell desktop 配置。
 # 与真机共享 lossilk.desktop._.niri-dms-desktop；本文件只保留 VM host spec。
 #

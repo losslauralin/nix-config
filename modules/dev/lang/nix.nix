@@ -1,4 +1,3 @@
-# modules/dev/lang/nix.nix
 {inputs, ...}: {
   lossilk.dev._.lang._.nix.homeManager = {pkgs, ...}: {
     home.packages = [

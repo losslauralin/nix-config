@@ -1,5 +1,3 @@
-# modules/flake-parts/git-hooks.nix
-#
 # Declarative git hooks via cachix/git-hooks.nix.
 #
 # Hooks intentionally reuse the project's existing treefmt-nix configuration

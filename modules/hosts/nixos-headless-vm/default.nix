@@ -1,5 +1,3 @@
-# modules/hosts/nixos-headless-vm/default.nix
-#
 # Host: nixos-headless-vm —— qemu VM, 纯 CLI / 服务端使用.
 # 走 lossilk.virt._.vm._.headless 变体 (-nographic, 无 GPU / 无 display,
 # 资源调小, forward 2223 错开 GUI VM 的 2222).

@@ -1,6 +1,3 @@
-# modules/system/xdg.nix
-#
-# XDG Base Directory 与常见工具路径清理。
 {
   lossilk.system._.xdg = {
     nixos.xdg.terminal-exec.enable = true;

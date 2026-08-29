@@ -1,5 +1,3 @@
-# modules/den/schema/host/displays.nix
-#
 # Host display metadata schema. Actual display values remain host specs; this file
 # only owns the shared den.schema.host interface consumed by desktop/gaming Aspects.
 {lib, ...}: let

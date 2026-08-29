@@ -1,5 +1,3 @@
-# modules/networking/ssh.nix
-#
 # SSH remote-access concerns. Agent and server are explicit children; no generic ssh
 # root Aspect exists because there is no shared SSH behavior to activate implicitly.
 {

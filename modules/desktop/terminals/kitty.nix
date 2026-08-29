@@ -1,4 +1,3 @@
-# modules/desktop/terminals/kitty.nix
 {
   lossilk.desktop._.terminals._.kitty.homeManager = {
     programs.kitty = {

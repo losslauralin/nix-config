@@ -1,4 +1,3 @@
-# modules/dev/lang/rust.nix
 {inputs, ...}: {
   lossilk.dev._.lang._.rust = {
     nixos = {

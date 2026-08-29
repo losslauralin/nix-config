@@ -1,4 +1,3 @@
-# modules/dev/git/radicle.nix
 {
   lossilk.dev._.git._.radicle.homeManager = {
     pkgs,

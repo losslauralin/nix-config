@@ -1,4 +1,3 @@
-# modules/desktop/platform/portal.nix
 {
   lossilk.desktop._.platform._.portal.nixos = {pkgs, ...}: {
     xdg.portal = {

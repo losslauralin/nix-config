@@ -1,5 +1,3 @@
-# modules/desktop/shell/noctalia.nix
-#
 # lossilk.desktop._.shell._.noctalia - Noctalia for niri (candidate)
 #
 # quickshell-based shell, 接管 bar / 通知 / launcher / lockscreen.

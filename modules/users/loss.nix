@@ -1,5 +1,3 @@
-# modules/users/loss.nix
-#
 # User "loss" 主切面 —— 仅引跨平台/跨架构通用切面。
 # 平台/host 锁定的切面在对应 host 主切面 includes 里。
 # User entity 由各 host 文件在 den.hosts.<system>.<host>.users.loss 声明。
@@ -38,6 +36,7 @@
       <lossilk/dev/workflow/direnv> # 自动加载项目环境变量
       <lossilk/dev/workflow/devenv> # 可复制开发沙盒
       <lossilk/dev/workflow/hyperfine> # 基准测试工具
+      <lossilk/dev/workflow/herdr> # 进程管理器
       <lossilk/dev/workflow/ni> # 自动检测包管理器
       <lossilk/dev/workflow/ansible> # 自动化运维
       <lossilk/dev/lang/go>
@@ -46,7 +45,6 @@
       <lossilk/dev/lang/nix>
       <lossilk/dev/lang/javascript>
       <lossilk/dev/editors/neovim> # 默认编辑器 + EDITOR/VISUAL
-      <lossilk/dev/editors/emacs> # Emacs 编辑器
       <lossilk/dev/editors/helix> # Helix 模态编辑器
       <lossilk/dev/editors/zed> # Zed GUI 编辑器
 

@@ -1,6 +1,3 @@
-# modules/hacking/default.nix
-#
-# Domain: 渗透攻防 — 安全工具箱核心
 {inputs, ...}: {
   lossilk.hacking = {
     nixos = {
@@ -19,15 +16,6 @@
     }: {
       home.packages = with pkgs; [
         wordlists
-        (writeScriptBin "wlfuzz" ''
-          #!${lib.getExe nushell}
-
-          ${lib.getExe television} files ${wordlists}/share/wordlists -s "fd . -t l" -p "${lib.getExe bat} {}"
-            | $"${wordlists}/share/wordlists/($in)"
-            | tee { print $in }
-            | ${lib.getExe' wl-clipboard "wl-copy"}
-        '')
-
         nmap
         theharvester
         enum4linux-ng

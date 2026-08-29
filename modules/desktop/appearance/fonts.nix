@@ -1,4 +1,3 @@
-# modules/desktop/appearance/fonts.nix
 {
   lossilk.desktop._.appearance._.fonts = {
     nixos = {pkgs, ...}: {

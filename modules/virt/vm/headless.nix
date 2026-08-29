@@ -1,5 +1,3 @@
-# modules/virt/vm/headless.nix
-#
 # lossilk.virt._.vm._.headless —— qemu VM 变体: 纯 CLI / 串口, 无 GPU 透传.
 #
 # 不继承 virt._.vm (其 qemu.options 内置 -device virtio-vga-gl / -display gtk,

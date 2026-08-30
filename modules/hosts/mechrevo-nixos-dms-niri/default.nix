@@ -9,6 +9,8 @@
   lossilk,
   ...
 }: {
+  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri.users.loss = {};
+
   den.aspects.mechrevo-nixos-dms-niri = {
     # 与 nixos-niri-dms-vm 保持相同用户应用/服务能力; 只排除 virt._.vm。
     users.loss = {};

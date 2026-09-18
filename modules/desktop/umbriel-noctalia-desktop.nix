@@ -1,7 +1,7 @@
 # lossilk.desktop._.umbriel-noctalia-desktop —— "The Noctalia Family" 桌面路线 glue。
 #
 # Umbriel (compositor) + Noctalia (shell) + Noctalia Greeter 三件一起跑。
-# 三件各自是独立能力切面 (compositor._.umbriel / shell._.noctalia / greeter._.noctalia),
+# 三件各自是独立能力切面 (compositor._.umbriel / shell._.noctalia / greeter._.noctalia-greeter),
 # 它们之间的对接属于路线级协调, 集中放在这里:
 #   - Umbriel autostart Noctalia
 #   - Noctalia IPC 键位 (官方 Umbriel 指南)
@@ -24,7 +24,7 @@
       desktop._.input._.fcitx5-rime-wanxiang
       desktop._.compositor._.umbriel
       desktop._.shell._.noctalia
-      desktop._.greeter._.noctalia
+      desktop._.greeter._.noctalia-greeter
     ];
 
     homeManager = {lib, ...}: {

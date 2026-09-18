@@ -1,4 +1,4 @@
-# lossilk.desktop._.greeter._.noctalia —— Noctalia Greeter capability (greetd)。
+# lossilk.desktop._.greeter._.noctalia-greeter —— Noctalia Greeter capability (greetd)。
 #
 # "The Noctalia Family" 第三件: greetd 登录界面, 跟 Noctalia shell 用同一套
 # wallpaper / palette / 字体, 所以从开机到进桌面观感一致。
@@ -12,7 +12,7 @@
 # Umbriel session 由 compositor 切面经 `programs.umbriel` 注册进
 # `services.displayManager.sessionPackages`, greeter 才能发现它。
 _: {
-  lossilk.desktop._.greeter._.noctalia.nixos = {
+  lossilk.desktop._.greeter._.noctalia-greeter.nixos = {
     services.displayManager.noctalia-greeter = {
       enable = true;
 

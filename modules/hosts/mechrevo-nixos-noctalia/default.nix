@@ -1,5 +1,6 @@
-# Host: mechrevo-nixos-dms-niri —— 真机 (MECHREVO 耀世 16 Pro GM6IX0B), niri + DankMaterialShell desktop.
-# 以 nixos-niri-dms-vm 为模板, 保留同一套用户应用/服务选择, 把 virt._.vm 换成真实硬件:
+# Host: mechrevo-nixos-noctalia —— 真机 (MECHREVO 耀世 16 Pro GM6IX0B),
+# "The Noctalia Family" 桌面: Umbriel compositor + Noctalia shell + Noctalia Greeter。
+# 由原 niri + DankMaterialShell 方案就地改造; 硬件/磁盘事实保持不变:
 #   - ./_disko.nix          声明式分区 (Btrfs-on-LUKS)
 #   - ./facter.json         硬件探测报告 (真机 sudo nixos-facter 生成)
 #   - nixos-hardware.*       机型通用调优
@@ -9,20 +10,23 @@
   lossilk,
   ...
 }: {
-  den.hosts.x86_64-linux.mechrevo-nixos-dms-niri.users.loss = {};
-
-  den.aspects.mechrevo-nixos-dms-niri = {
-    # 与 nixos-niri-dms-vm 保持相同用户应用/服务能力; 只排除 virt._.vm。
+  # den.schema.host.displays 是 host entity 的 schema option: 必须声明在 entity 上
+  # (`den.hosts...`), 写在生成切面 (`den.aspects...`) 上会被静默忽略, 消费方
+  # (compositor outputs / gaming Display）会拿到空值。
+  den.hosts.x86_64-linux.mechrevo-nixos-noctalia = {
     users.loss = {};
-
     displays.eDP-1 = {
       primary = true;
       refresh = 240.0;
       width = 2560;
       height = 1600;
     };
+  };
+
+  den.aspects.mechrevo-nixos-noctalia = {
+    users.loss = {};
     includes = with lossilk; [
-      desktop._.niri-dms-desktop
+      desktop._.umbriel-noctalia-desktop
       ai._.axonhub._.local
       desktop._.gui
       desktop._.localsend
@@ -68,7 +72,7 @@
       services.fwupd.enable = true; # 固件更新 (真机)
 
       nixpkgs.hostPlatform = "x86_64-linux";
-      # DMS greeter 负责 greetd 登录界面与用户会话选择.
+      # Noctalia Greeter 负责 greetd 登录界面与用户会话选择.
     };
 
     # user class 路由到 users.users.loss.extraGroups

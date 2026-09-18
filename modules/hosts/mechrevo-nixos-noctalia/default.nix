@@ -62,6 +62,14 @@
         open = true; # Ada 用 open 内核模块
       };
 
+      # Early KMS: 把 nvidia KMS 栈提前到 initrd 加载。
+      # 本机是 Wayland-only (greetd), services.xserver.enable=false, 所以 nixpkgs 里那段
+      # `boot.kernelModules = [nvidia nvidia_modeset nvidia_drm]` (被 xserver.enable 门控) 不生效;
+      # 否则 simpledrm(EFI fb) 一直撑到 stage-2, nvidia 接管时与 plymouth 交接 → 进桌面偶发花屏。
+      # 不需要重复写 modeset/fbdev (hardware.nvidia.moduleParams 经 extraModprobeConfig 已带入 initrd),
+      # 也不需要 nvidia_uvm (CUDA 用, 保持 nixpkgs 的 stage-2 softdep 加载)。GSP 固件随 hardware.firmware 进 initrd。
+      boot.initrd.kernelModules = ["nvidia" "nvidia_modeset" "nvidia_drm"];
+
       boot.loader.systemd-boot.enable = true;
       boot.loader.efi.canTouchEfiVariables = true;
       zramSwap.enable = true;

@@ -9,6 +9,12 @@
 
       virtualisation.arion.backend = "podman-socket";
 
+      # 用 nixpkgs 打包的 arion (同为上游 0.2.2.0), 而非 flake input 的默认包:
+      # input 的构建会跑自带测试, 测试 eval 其 container-systemd.nix 时会设置
+      # nixpkgs 26.11 已移除的 services.journald.console → assert 失败, 整机构建挂掉.
+      # 该文件上游自 2019 年未更新, 无新版本可升; nixpkgs 的同版本包可正常构建.
+      virtualisation.arion.package = pkgs.arion;
+
       # 开机自启的 arion 服务在 clash-verge TUN/DNS 就绪前跑 pull 会失败,
       # 且 arion 生出的 unit 是 Restart=no → 一次竞速失败后永远装死。
       # 这里补 ordering + 失败重试, 直到镜像拉取/容器起来。

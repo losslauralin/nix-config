@@ -111,7 +111,7 @@ _: {
             }
           ];
 
-          outputs =
+          output =
             if host.displays == {}
             then {}
             else lib.mapAttrs mkOutput host.displays;
@@ -139,8 +139,8 @@ _: {
             "Mod+F" = "window-toggle-maximize";
             "Mod+Shift+F" = "window-toggle-fullscreen";
             "Mod+C" = "column-center";
-            "Mod+R" = "window-cycle-primary-extent";
-            "Mod+E" = "window-cycle-primary-extent-back";
+            "Mod+R" = "window-cycle-width";
+            "Mod+E" = "window-cycle-width-back";
 
             # 焦点 (vim)
             "Mod+H" = "window-focus-left";

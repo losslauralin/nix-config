@@ -94,18 +94,12 @@
           {
             match.app_id = "^dev.noctalia.Noctalia$";
             default_floating = true;
-            default_floating_size_px = {
-              width = 1020;
-              height = 900;
-            };
+            default_size = [1020 900];
           }
           {
             match.app_id = "^dev.noctalia.UmbrielSharePicker$";
             default_floating = true;
-            default_floating_size_px = {
-              width = 800;
-              height = 600;
-            };
+            default_size = [800 600];
           }
         ];
 

@@ -9,6 +9,18 @@
 
       virtualisation.arion.backend = "podman-socket";
 
+      # 开机自启的 arion 服务在 clash-verge TUN/DNS 就绪前跑 pull 会失败,
+      # 且 arion 生出的 unit 是 Restart=no → 一次竞速失败后永远装死。
+      # 这里补 ordering + 失败重试, 直到镜像拉取/容器起来。
+      systemd.services.arion-axonhub = {
+        wants = ["network-online.target"];
+        after = ["network-online.target"];
+        serviceConfig = {
+          Restart = "on-failure";
+          RestartSec = 30;
+        };
+      };
+
       virtualisation.docker.enable = false;
 
       virtualisation.podman = {

@@ -17,6 +17,10 @@
             type = "filesystem";
             format = "vfat";
             mountpoint = "/boot";
+            # FAT 无 Unix 权限位: 不给 umask 时按默认 0755 挂载 → systemd 报
+            # "Mount point '/boot' ... is world accessible, which is a security hole!"
+            # (random-seed 写入警示). 0077 同时作用于 live disko 与装机后的 fstab.
+            mountOptions = ["umask=0077"];
           };
         };
         luks = {

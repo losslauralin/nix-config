@@ -19,7 +19,7 @@ stdenvNoCC.mkDerivation (finalAttrs: {
       # 大模型语法包 (必装组件): 所有版本用户均必须下载, 与方案文件放一起.
       # 上游只有 LTS release tag, 内容不定期覆盖更新, hash 失效时重新 prefetch.
       url = "https://github.com/amzxyz/RIME-LMDG/releases/download/LTS/wanxiang-lts-zh-hans.gram";
-      hash = "sha256-FjVYgAbXnMaVX7zz2N4Sgio2hW61QIc1qLSilSsWyt8=";
+      hash = "sha256-muS3vo5FWBGBJKf7BQl9tqNBPVFamLFKvQK4ogddBUI=";
     })
   ];
 

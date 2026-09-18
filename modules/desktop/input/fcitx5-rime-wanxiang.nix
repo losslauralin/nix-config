@@ -10,8 +10,9 @@
         enable = true;
         type = "fcitx5";
         fcitx5.addons = [
-          pkgs.fcitx5-rime
-          rime-wanxiang
+          (pkgs.fcitx5-rime.override {
+            rimeDataPkgs = [rime-wanxiang];
+          })
         ];
       };
 
@@ -33,7 +34,6 @@
       xdg.dataFile = {
         "fcitx5/rime/default.custom.yaml".text = ''
           patch:
-            __include: wanxiang_suggested_default:/
             schema_list:
               - schema: wanxiang_pro
         '';

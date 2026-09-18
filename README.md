@@ -164,7 +164,7 @@ nix-config/
 │   ├── security/  virt/  ai/
 │   └── flake-parts/       ← formatter.nix, git-hooks.nix, devshell.nix, deploy
 ├── pkgs/by-name/          ← custom packages (pkgs-by-name-for-flake-parts)
-└── scripts/               ← deploy.sh, run-vm-arch.sh
+└── scripts/               ← nixdaemon-proxy.sh
 ```
 
 ## Technology Stack

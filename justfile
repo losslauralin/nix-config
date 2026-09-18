@@ -103,10 +103,14 @@ fmt *args:
 lint *args:
     nix fmt -- --fail-on-change --formatters deadnix,statix,shellcheck,ruff-check {{ args }}
 
-# boot /tmp/result-<host>/bin/run-<host>-vm (Arch: 用 host qemu 替代 nix-store qemu)
+# boot /tmp/result-<host>/bin/run-<host>-vm (build first: `just build-vm <host>`)
 [group('nix')]
-run-vm host:
-    RESULT=/tmp/result-{{ host }} scripts/run-vm-arch.sh {{ host }}
+run-vm host *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    runner=/tmp/result-{{ host }}/bin/run-{{ host }}-vm
+    [[ -x $runner ]] || { echo "missing $runner — run: just build-vm {{ host }}" >&2; exit 1; }
+    exec "$runner" {{ args }}
 
 # nix flake update [args]
 [group('nix')]

@@ -35,9 +35,8 @@
           # grab-on-hover=on: 鼠标进 VM 窗口自动抓键盘, 释放是 Ctrl+Alt+G. 这是为
           # 让 Mod (Super) 键不被宿主机的 hyprland/niri/sway/i3 等 Wayland WM 截获,
           # 而是直接传给 VM 内的 Umbriel. 不抓的话 host WM 会先收 Super 触发自己绑定.
-          # 注: NixOS-built qemu (nix store 的) 在非-NixOS host 上找 /run/opengl-driver
-          # 失败, 必须用 host 系统的 qemu binary 跑 (Arch: 经 scripts/run-vm-arch.sh
-          # 把 /nix/store/...-qemu/.../qemu-system-x86_64 替换成 /usr/bin/qemu-system-x86_64).
+          # 注: nix store 的 qemu 在非-NixOS host 上找不到 /run/opengl-driver, GL 会起不来.
+          # 现在 host 是 NixOS, 直接用 store qemu 跑即可 (just build-vm / just run-vm).
           "-display gtk,gl=on,show-cursor=on,grab-on-hover=on"
           "-device virtio-rng-pci"
           # 诊断兜底: serial 接到 launcher 终端 stdio. NixOS vmVariant 默认 kernel
@@ -55,7 +54,7 @@
         ];
       };
 
-      # VM 内开 sshd 方便从 Arch host 调试
+      # VM 内开 sshd 方便从 host 调试
       services.openssh = {
         enable = true;
         settings = {

@@ -65,8 +65,16 @@
       boot.loader.efi.canTouchEfiVariables = true;
       zramSwap.enable = true;
 
-      # Windows NTFS 数据盘 (nvme1n1p1): 只挂载, 不分区/格式化 → 不进 disko, udisks2 按需挂.
-      # 真机: 文件管理器点击, 或 udisksctl mount -b /dev/disk/by-uuid/CEEB00109B98B771 (label 数据).
+      # Windows NTFS 数据盘 (nvme1n1p1, label 数据): 绝不分区/格式化 → 不进 disko;
+      # 开机 rw 挂到 /mnt/win_d. nofail: 盘不在也不阻塞开机.
+      # 注意: Windows 侧保持快速启动/休眠关闭, 否则脏卷会让 ntfs3 降级只读挂载.
+      fileSystems."/mnt/win_d" = {
+        device = "/dev/disk/by-uuid/CEEB00109B98B771";
+        fsType = "ntfs3";
+        options = ["rw" "uid=1000" "gid=100" "iocharset=utf8" "nofail" "x-systemd.device-timeout=10"];
+      };
+
+      # 其余移动盘/临时盘仍由 udisks2 按需挂 (文件管理器点击 / udisksctl).
       services.udisks2.enable = true;
 
       services.fwupd.enable = true; # 固件更新 (真机)

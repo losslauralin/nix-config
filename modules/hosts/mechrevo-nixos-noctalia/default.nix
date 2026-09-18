@@ -20,6 +20,7 @@
       refresh = 240.0;
       width = 2560;
       height = 1600;
+      scaling = 1.25;
     };
   };
 

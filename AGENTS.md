@@ -33,12 +33,12 @@ Direct OK: `modules/*`, `scripts/*`, `*.md`.
 |------|--------|
 | Hardware, disk, VM, WSL, one-off host facts | **Host spec** (`modules/hosts/<name>/`) |
 | Reusable capability | **Capability aspect** under `modules/` shelves |
-| Multi-capability supported route | **Glue aspect** (e.g. `niri-dms-desktop`) |
+| Multi-capability supported route | **Glue aspect** (e.g. `umbriel-noctalia-desktop`) |
 | Cross-host personal env | **User** aspect (`modules/users/loss.nix`) |
 
 - `modules/` directory names are **mutable shelves**, not ownership or namespace contracts.
 - Do **not** reorganize toward upstream demo layouts like `modules/aspects/...`.
-- Supported desktop route: **`lossilk.desktop._.niri-dms-desktop`** only. Not a free compositor/shell matrix; `noctalia` etc. are unsupported candidates.
+- Supported desktop route: **`lossilk.desktop._.umbriel-noctalia-desktop`** only (Umbriel + Noctalia shell + Noctalia Greeter). Not a free compositor/shell matrix.
 
 ## Den wiring (must not silent-fail)
 

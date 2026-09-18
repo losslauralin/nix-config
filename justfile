@@ -33,7 +33,7 @@ build *args:
       nix build --log-format internal-json -v {{ args }} |& "$nom_out/bin/nom" --json
     fi
 
-# nix build <host>'s VM image to /tmp/result-<host>/  (e.g. just build-vm nixos-niri-dms-vm)
+# nix build <host>'s VM image to /tmp/result-<host>/  (e.g. just build-vm nixos-noctalia-vm)
 # Wrapped with nom (NO_NOM=1 or non-tty disables).
 [group('nix')]
 build-vm host *args:

@@ -28,8 +28,8 @@ After cloning, run `nix develop` once to install the pre-commit hooks.
 
 | Host | Type | Platform | Desktop |
 |------|------|----------|---------|
-| `mechrevo-nixos-dms-niri` | Bare metal (MECHREVO laptop) | x86_64-linux | niri + DankMaterialShell |
-| `nixos-niri-dms-vm` | QEMU VM | x86_64-linux | niri + DankMaterialShell |
+| `mechrevo-nixos-noctalia` | Bare metal (MECHREVO laptop) | x86_64-linux | Umbriel + Noctalia shell + Noctalia Greeter |
+| `nixos-noctalia-vm` | QEMU VM | x86_64-linux | Umbriel + Noctalia shell + Noctalia Greeter |
 | `nixos-headless-vm` | QEMU VM | x86_64-linux | — (headless) |
 | `nixos-wsl` | WSL2 | x86_64-linux | — (terminal-only) |
 
@@ -49,7 +49,7 @@ modules/
 ├── nix/  home-manager/  flake-parts/  ← git-hooks.nix, formatter.nix, devshell.nix live here
 ├── cli/                 ← shell family, prompt, CLI/TUI tools
 ├── dev/                 ← editors, git workflow, languages, project workflow
-├── desktop/             ← compositor, shell, terminals, browsers, platform, search, appearance
+├── desktop/             ← compositor, shell, greeter, terminals, browsers, platform, appearance
 ├── security/  virt/  ai/
 └── gaming.nix  hacking/  audio.nix
 ```
@@ -73,7 +73,7 @@ CI runs the full `nix flake check`. It cannot use `--no-build` because the catpp
 | Rule | Why |
 |------|-----|
 | `den.default` = framework defaults only | `stateVersion`, `allowUnfree`, and the `define-user`/`hostname` pipeline. No desktop route, no app bundle; `host-aspects` is user opt-in. |
-| Glue aspects are explicit | Hosts include supported route glue directly, for example `lossilk.desktop._.niri-dms-desktop`. This is still an ordinary Den aspect, not a separate primitive. |
+| Glue aspects are explicit | Hosts include supported route glue directly, for example `lossilk.desktop._.umbriel-noctalia-desktop`. This is still an ordinary Den aspect, not a separate primitive. |
 | One concern per aspect, unless it is genuinely tiny | Coreutils replacements (`bat`/`eza`/`fd`/`ripgrep`) live together in `cli/utils.nix`; configured tools (`fzf`/`yazi`/`zoxide`) get their own file. |
 | Cross-platform → user aspect; host-locked → host aspect | Shell tools go in `lossilk.cli._.*`, platform configs in `lossilk.virt`, hardware specs inline in host `nixos` block. |
 
@@ -122,8 +122,8 @@ just os-switch .#<host>
 ### VM test loop (avoid bare metal rebuilds)
 
 ```bash
-just build-vm nixos-niri-dms-vm     # build VM image
-just test-vm nixos-niri-dms-vm      # build + boot
+just build-vm nixos-noctalia-vm     # build VM image
+just test-vm nixos-noctalia-vm      # build + boot
 ```
 
 Edit host config -> `just build-vm` -> `just run-vm` -> iterate, then deploy to bare metal when stable.
@@ -178,11 +178,8 @@ nix-config/
 | [nix-community/disko](https://github.com/nix-community/disko) | Declarative disk partitioning |
 | [numtide/nixos-facter](https://github.com/numtide/nixos-facter) | Hardware detection |
 | [NixOS/nixos-hardware](https://github.com/NixOS/nixos-hardware) | Hardware-specific tuning |
-| [sodiboo/niri-flake](https://github.com/sodiboo/niri-flake) | Niri compositor (NixOS + HM modules) |
-| [AvengeMedia/DankMaterialShell](https://github.com/AvengeMedia/DankMaterialShell) | quickshell-based desktop shell |
-| [noctalia-dev/noctalia-shell](https://github.com/noctalia-dev/noctalia-shell) | Alternative quickshell-based shell |
+| [Noctalia family](https://noctalia.dev/) | Noctalia shell + Umbriel compositor + Noctalia Greeter — plain nixpkgs NixOS modules plus the native HM module, no flake input |
 | [NixOS-WSL](https://github.com/nix-community/NixOS-WSL) | NixOS on WSL2 |
-| [AvengeMedia/danksearch](https://github.com/AvengeMedia/danksearch) | Local file index + search daemon |
 | [treefmt-nix](https://github.com/numtide/treefmt-nix) | Multi-language formatting (alejandra, shfmt, shellcheck, deadnix, statix, …) |
 | [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) | Declarative pre-commit hooks |
 | [DeterminateSystems/determinate-nix-action](https://github.com/DeterminateSystems/determinate-nix-action) | Nix installer for GitHub Actions runners |

@@ -117,10 +117,10 @@ _Avoid_: arbitrary combo, plugin, desktop shell swap
 
 ### Desktop Route Terms
 
-**niri-dms-desktop**: A Glue Aspect for the currently supported niri + DankMaterialShell desktop route. It is not evidence that compositor and shell modules form a free variant matrix, and it is allowed to remain route-specific until repeated integrations justify a more general abstraction.
+**umbriel-noctalia-desktop**: A Glue Aspect for the only supported desktop route: the Noctalia family running together — Umbriel compositor, Noctalia shell, and Noctalia Greeter. Each family member stays a separate capability aspect (`compositor._.umbriel`, `shell._.noctalia`, `greeter._.noctalia`); autostart, IPC keybinds, and window/layer rules that pair them live in this glue aspect.
 _Avoid_: variant combination, desktop generator
 
-**Niri-coupled Capability Aspect**: A capability aspect that assumes niri integration in its own configuration, such as contributing `programs.niri.settings` or selecting a niri greeter/compositor. This repo treats these as ad hoc supported routes unless enough Glue Aspect code exists to prove broader combinations.
+**Compositor-coupled Capability Aspect**: A capability aspect that assumes one compositor in its own configuration, such as contributing that compositor's settings, keybinds, or greeter wiring. This repo treats such pairings as supported routes only when an explicit Glue Aspect exists; they are not evidence that compositor and shell modules form a free variant matrix.
 _Avoid_: generic shell variant, freely composable desktop component
 
 **Free Desktop Combination**: Arbitrary composition of compositor, shell, portal, launcher, greeter, search, and IPC bindings. This is not a supported model in the current repo because avoiding ad hoc coupling would require substantial explicit Glue Aspect code.
@@ -129,5 +129,5 @@ _Avoid_: supported default, simple variant swap
 **Unsupported Candidate**: A support-status label for an aspect/module kept in-tree for possible future use but not exposed as a supported route until it has a stable Glue Aspect and verified integration behavior.
 _Avoid_: supported variant, available option
 
-**Noctalia**: An unsupported Niri-coupled Capability Aspect candidate; it is not stable or verified enough for this repo's supported desktop route.
-_Avoid_: DMS alternative, niri shell variant
+**Noctalia family**: The Noctalia shell (`shell/noctalia.nix`), Umbriel compositor (`compositor/umbriel.nix`), and Noctalia Greeter (`greeter/noctalia.nix`) capability aspects, all built on native nixpkgs NixOS modules plus the native Home Manager module (no noctalia flake input). The shell is compositor-agnostic; pairings with Umbriel belong to the `umbriel-noctalia-desktop` glue aspect.
+_Avoid_: DMS alternative, niri shell variant, quickshell shell

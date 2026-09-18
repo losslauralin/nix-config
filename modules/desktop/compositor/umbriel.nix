@@ -79,6 +79,10 @@ _: {
               natural_scroll = true;
             };
             mouse.accel_profile = "flat";
+            # 逻辑像素; Umbriel 会按 output scale 重新加载光标 (1.25x),
+            # 并把它 setenv 给 XCURSOR_SIZE 供客户端使用。默认 24 在这个
+            # 189ppi 的屏上偏小, 这里按 2 倍取 48。
+            cursor.size = 48;
           };
 
           layout = {

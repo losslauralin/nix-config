@@ -19,7 +19,7 @@
       desktop._.appearance._.fonts
       (desktop._.appearance._.catppuccin "latte" "mauve")
       desktop._.browsers._.chrome
-      desktop._.terminals._.kitty
+      desktop._.terminals._.foot
       desktop._.platform._.flatpak
       desktop._.input._.fcitx5-rime-wanxiang
       desktop._.compositor._.umbriel
@@ -30,7 +30,7 @@
     homeManager = {lib, ...}: {
       home.sessionVariables = {
         BROWSER = lib.mkDefault "google-chrome-stable";
-        TERMINAL = lib.mkDefault "kitty";
+        TERMINAL = lib.mkDefault "foot";
       };
 
       programs.umbriel.settings = {

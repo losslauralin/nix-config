@@ -58,6 +58,6 @@
     ];
 
     # initialPassword 走 user class (den.provides.os-user 自动路由到 users.users.loss.*)
-    user.initialPassword = "password";
+    user.initialPassword = "loss";
   };
 }

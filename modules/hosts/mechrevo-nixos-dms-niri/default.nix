@@ -32,6 +32,7 @@
       system._.filesystems._.ntfs # Windows 数据盘按需挂载支持
       system._.peripherals._.bluetooth # 真机蓝牙外设支持
       system._.power-mgmt # 笔记本电源模式 / thermal / upower
+      networking._.clash-verge # Clash Verge Rev GUI: TUN 走 root 特权服务 (非 setuid)
     ];
 
     nixos = _: {

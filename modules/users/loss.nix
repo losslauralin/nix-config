@@ -55,7 +55,6 @@
       <lossilk/hacking>
       <lossilk/security/sops>
       <lossilk/security/bitwarden>
-      <lossilk/networking/karing>
     ];
 
     # initialPassword 走 user class (den.provides.os-user 自动路由到 users.users.loss.*)

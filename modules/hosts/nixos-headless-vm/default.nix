@@ -50,7 +50,7 @@
     # host spec nixos class
     nixos = _: {
       nixpkgs.hostPlatform = "x86_64-linux";
-      # 没有 greetd, 没有 niri —— headless VM 直接走 TTY getty 自动登录 loss.
+      # 没有 greetd, 没有图形会话 —— headless VM 直接走 TTY getty 自动登录 loss.
       # autologinUser 是全局选项, 对 ttyS0 (vmVariant 设的 console) 也生效.
       # 远程用 SSH 进来不需要这套, 但留本地 fallback 方便 console 调试.
       services.getty.autologinUser = "loss";

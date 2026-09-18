@@ -18,11 +18,7 @@ in {
       };
     };
 
-    homeManager = {
-      config,
-      pkgs,
-      ...
-    }: {
+    homeManager = {pkgs, ...}: {
       imports = [
         inputs.catppuccin.homeModules.catppuccin
         inputs.nix-colors.homeManagerModule
@@ -70,28 +66,6 @@ in {
         gtk3.theme = {
           name = "adw-gtk3";
           package = pkgs.adw-gtk3;
-        };
-      };
-
-      programs = lib.optionalAttrs (config.programs ? niri) {
-        niri.settings = let
-          palette =
-            (builtins.fromJSON (builtins.readFile (config.catppuccin.sources.palette + /palette.json)))
-              .${flavor}.colors;
-        in {
-          overview.backdrop-color = palette.crust.hex;
-          layout = {
-            background-color = palette.crust.hex;
-            focus-ring.active.color = palette.${accent}.hex;
-            focus-ring.urgent.color =
-              if accent == "red"
-              then palette.blue.hex
-              else palette.red.hex;
-            tab-indicator.active.color =
-              if accent == "peach"
-              then palette.blue.hex
-              else palette.peach.hex;
-          };
         };
       };
     };

@@ -29,12 +29,12 @@
         cores = 4;
         graphics = true;
         qemu.options = [
-          # virtio-vga-gl + virgl: 给 guest 提供真 EGL_EXT_device_drm, niri 起来必须.
+          # virtio-vga-gl + virgl: 给 guest 提供真 EGL_EXT_device_drm, Wayland compositor 起来必须.
           "-device virtio-vga-gl"
           # gtk + gl=on: 配合 virtio-vga-gl, host GPU 经 virglrenderer 加速 guest GL.
           # grab-on-hover=on: 鼠标进 VM 窗口自动抓键盘, 释放是 Ctrl+Alt+G. 这是为
           # 让 Mod (Super) 键不被宿主机的 hyprland/niri/sway/i3 等 Wayland WM 截获,
-          # 而是直接传给 VM 内的 niri. 不抓的话 host WM 会先收 Super 触发自己绑定.
+          # 而是直接传给 VM 内的 Umbriel. 不抓的话 host WM 会先收 Super 触发自己绑定.
           # 注: NixOS-built qemu (nix store 的) 在非-NixOS host 上找 /run/opengl-driver
           # 失败, 必须用 host 系统的 qemu binary 跑 (Arch: 经 scripts/run-vm-arch.sh
           # 把 /nix/store/...-qemu/.../qemu-system-x86_64 替换成 /usr/bin/qemu-system-x86_64).
@@ -42,7 +42,7 @@
           "-device virtio-rng-pci"
           # 诊断兜底: serial 接到 launcher 终端 stdio. NixOS vmVariant 默认 kernel
           # 参数已含 console=ttyS0,115200n8 console=tty0, 黑屏时仍能在启动 VM 的终端
-          # 看到 kernel + userspace 日志 (greetd / niri 失败原因等). monitor 跟 stdio
+          # 看到 kernel + userspace 日志 (greetd / Umbriel 失败原因等). monitor 跟 stdio
           # 多路复用 (mon:stdio), 不需要额外终端.
           "-serial mon:stdio"
         ];

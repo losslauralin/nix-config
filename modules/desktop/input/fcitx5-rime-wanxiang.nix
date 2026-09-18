@@ -20,6 +20,25 @@
     };
 
     homeManager = {
+      pkgs,
+      lib,
+      ...
+    }: {
+      # rime 的 schema 编译缓存不在 Nix 管理范围内, 且 librime 只按 mtime 判断
+      # 是否需要重新部署; nix store 文件 mtime 恒为 0, 所以数据包版本变化时
+      # rime 不会自动重建 $HOME/.local/share/fcitx5/rime/build/.
+      # 这里用 stamp 记录数据包 store path, 变化时清一次缓存让 rime 重新部署.
+      home.activation.rimeWanxiangDataChanged = lib.hm.dag.entryAfter ["writeBoundary"] ''
+        rimeDir="$HOME/.local/share/fcitx5/rime"
+        stamp="$rimeDir/.wanxiang-data"
+        dataPath="${inputs.self.packages.${pkgs.stdenv.hostPlatform.system}.rime-wanxiang}"
+        if [ "$(cat "$stamp" 2>/dev/null)" != "$dataPath" ]; then
+          run --silence rm -rf "$rimeDir/build"
+          run mkdir -p "$rimeDir"
+          run --quiet sh -c 'printf "%s\n" "$1" > "$2"' _ "$dataPath" "$stamp"
+        fi
+      '';
+
       xdg.configFile."fcitx5/conf/classicui.conf".text = ''
         Vertical Candidate List=False
         WheelForPaging=True

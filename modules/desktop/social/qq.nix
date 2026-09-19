@@ -1,4 +1,4 @@
-# lossilk.desktop._.apps._.qq —— 腾讯 QQ (Linux 原生 NT 客户端)。
+# lossilk.desktop._.social._.qq —— 腾讯 QQ (Linux 原生 NT 客户端)。
 #
 # nixpkgs 的 `qq` 是 Electron 打包, wrapper 只在 `NIXOS_OZONE_WL` 非空时追加
 # `--ozone-platform=wayland --enable-features=WaylandWindowDecorations
@@ -13,7 +13,7 @@
 # 包装/依赖 (autoPatchelf、libayatana-appindicator 托盘等) 都由 nixpkgs 处理,
 # 本切面只负责追加启动标志。
 _: {
-  lossilk.desktop._.apps._.qq.homeManager = {pkgs, ...}: {
+  lossilk.desktop._.social._.qq.homeManager = {pkgs, ...}: {
     home.packages = [
       (pkgs.qq.override {
         commandLineArgs = "--ozone-platform=wayland --enable-features=WaylandWindowDecorations --enable-wayland-ime=true --wayland-text-input-version=3";

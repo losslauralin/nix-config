@@ -1,4 +1,4 @@
-# lossilk.desktop._.apps._.wechat —— 微信 (Linux 原生客户端)。
+# lossilk.desktop._.social._.wechat —— 微信 (Linux 原生客户端)。
 #
 # 选 nixpkgs 的 `wechat-uos` 而不是同名的 `wechat`:
 #   - `wechat` 是官方 AppImage, nixpkgs 从 web.archive.org 取包 (上游下载链接
@@ -14,7 +14,7 @@
 # 兜底: 想换官方 AppImage 版就把下面换成 `pkgs.wechat`; 代价是走 web.archive.org
 # 下载, 而且没有上面那套 launcher 环境处理, 输入法/缩放要自己接。
 _: {
-  lossilk.desktop._.apps._.wechat.homeManager = {pkgs, ...}: {
+  lossilk.desktop._.social._.wechat.homeManager = {pkgs, ...}: {
     home.packages = [pkgs.wechat-uos];
   };
 }

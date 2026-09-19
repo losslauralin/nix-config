@@ -28,6 +28,12 @@
     ];
 
     homeManager = {lib, ...}: {
+      # 终端 (foot) 的配色改由 Noctalia 的 terminal-sequences 模板提供 (见
+      # desktop/shell/noctalia.nix): 颜色跟随 Noctalia 当前主题 (含 GUI 覆盖)。
+      # 关闭 catppuccin 对 foot 的静态注入, 否则 latte 的浅色会与模板打架, 且终端
+      # 配色会有两个来源。其余 GUI 程序的 catppuccin 主题不受影响 (autoEnable 仍在)。
+      catppuccin.foot.enable = false;
+
       home.sessionVariables = {
         BROWSER = lib.mkDefault "google-chrome-stable";
         TERMINAL = lib.mkDefault "foot";

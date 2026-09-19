@@ -37,16 +37,14 @@ about** the changes already in the tree — for example a separate feature,
 fix, or experiment that the current dirty files do not depend on.
 
 Say so before editing anything, and name the reason: the work is unrelated to
-what is already in this workspace.
+what is already in this workspace. Point at the keybind, not a command line —
+the user drives herdr from its TUI, and herdr creates the worktree, opens it
+as a workspace, and focuses it in one step.
 
 ```
-This task is unrelated to the current workspace contents. Open a new herdr
-worktree first:
-
-  herdr worktree create --branch <name> --base HEAD \
-    --path ../nix-config-wt/<name> --label "<what>" --focus
-
-Then re-run the request there.
+This task is unrelated to what is already in this workspace. It belongs in a
+new herdr worktree — press `prefix+shift+g` (new worktree), then re-run the
+request there.
 ```
 
 Continue in the current workspace only when:

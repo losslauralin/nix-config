@@ -2,7 +2,7 @@
   lossilk.security._.bitwarden = {
     includes = [(den.batteries.insecure ["electron-39.8.10"])];
     homeManager = {pkgs, ...}: {
-      home.packages = [pkgs.bitwarden-desktop];
+      home.packages = [pkgs.bitwarden-desktop pkgs.pinentry-curses];
       programs.rbw.enable = true;
     };
   };

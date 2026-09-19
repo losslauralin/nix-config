@@ -14,6 +14,10 @@ in {
       catppuccin = {
         enable = true;
         autoEnable = true;
+        # 上游自己的二进制缓存 (选项会往 nix.settings 写入 catppuccin.cachix.org
+        # 与官方公钥, 不要手写 key)。注意: 构建期依赖 catppuccin-whiskers 本来就在
+        # cache.nixos.org 里, 开这个不是为了它, 而是为了上游其它构建产物。
+        cache.enable = true;
         inherit flavor accent;
       };
     };

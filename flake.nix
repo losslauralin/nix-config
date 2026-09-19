@@ -4,8 +4,19 @@
   outputs = inputs: inputs.flake-parts.lib.mkFlake {inherit inputs;} (inputs.import-tree ./modules);
 
   nixConfig = {
-    extra-substituters = ["https://nix-community.cachix.org"];
-    extra-trusted-public-keys = ["nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="];
+    # 与 modules/nix/default.nix 的 nix.settings 保持一致: 前者管系统 rebuild,
+    # 这里管 flake 求值 / 裸 `nix build` 阶段。缓存可用的顺序同理 —— 先第三方
+    # (它们才有上游包的产物), 国内镜像只镜像 cache.nixos.org, 不必在此重复列出。
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://catppuccin.cachix.org"
+      "https://cache.numtide.com"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "catppuccin.cachix.org-1:noG/4HkbhJb+lUAdKrph6LaozJvAeEEZj4N732IysmU="
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    ];
   };
 
   inputs = {

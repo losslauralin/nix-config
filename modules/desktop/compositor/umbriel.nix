@@ -34,12 +34,13 @@ _: {
     }: let
       tomlFormat = pkgs.formats.toml {};
 
-      # Catppuccin Cursors 把每个配色拆成一个单独 output (outputsToInstall = []),
-      # 所以必须取具体 output, 不能直接用 pkgs.catppuccin-cursors (那个只有 dummy out)。
-      # 目录名由 package.nix 生成: 输出名 "latteMauve" -> 驼峰前插连字符再小写
-      # -> catppuccin-latte-mauve-cursors。
-      cursorTheme = "catppuccin-latte-mauve-cursors";
-      cursorPackage = pkgs.catppuccin-cursors.latteMauve;
+      # phinger-cursors 里的 light/dark 说的是**指针自己**的颜色, 不是桌面配色:
+      # 本路线是 Catppuccin latte 浅色桌面, 所以取 dark (黑指针 + 白描边),
+      # 取 light 会得到白指针, 在浅背景上基本看不见。
+      # 它也是少数在 24/32/48/64/96/128 上都按原生网格绘制的主题, 所以下面的
+      # cursorSize = 32 是原生尺寸, 不会像缩放出来的光标那样发糊。
+      cursorTheme = "phinger-cursors-dark";
+      cursorPackage = pkgs.phinger-cursors;
       cursorSize = 32; # 逻辑像素; 188ppi 的屏上 32 已经明显大于默认 24
 
       # 240.0 -> "240" (Umbriel mode 串不需要小数尾巴), 59.94 -> "59.94"
@@ -70,13 +71,20 @@ _: {
       };
 
       config = {
-        # 光标主题包 + 环境变量。Umbriel 的 [input.cursor] 只管自己的指针, XWayland /
+        # 光标主题包 + 环境。Umbriel 的 [input.cursor] 只管自己的指针, XWayland /
         # GTK / Qt 客户端 (微信, wemeet-xwayland) 不读那个配置, 只认 XCURSOR_THEME
         # 和 XCURSOR_SIZE —— 两边都要设, 否则合成器内光标与应用内光标大小/样式不一致。
-        home.packages = [cursorPackage];
-        home.sessionVariables = {
-          XCURSOR_THEME = cursorTheme;
-          XCURSOR_SIZE = toString cursorSize;
+        #
+        # 这两件事交给 HM 的 home.pointerCursor 统一处理: 它会装包、写
+        # XCURSOR_THEME / XCURSOR_SIZE, 并同步 GTK 的 gtk-cursor-theme-name/-size
+        # 与 ~/.icons/default —— 比手写环境变量更全。下面的 [input.cursor] 读同一份
+        # 值, 保证合成器内与应用内始终一致。
+        home.pointerCursor = {
+          enable = true; # 不显式打开的话 HM 会报 deprecation warning
+          name = cursorTheme;
+          package = cursorPackage;
+          size = cursorSize;
+          gtk.enable = true;
         };
 
         programs.umbriel.settings = {
@@ -103,9 +111,10 @@ _: {
             #
             # size 是逻辑像素, 不乘 output scale (官方 examples/config.toml:
             # "Logical size, 1-512"), 默认 24 在这个高密度屏上偏小, 取 32。
+            # 值来自 home.pointerCursor, 与 XCURSOR_* / GTK 侧同源。
             cursor = {
-              theme = cursorTheme;
-              size = cursorSize;
+              theme = config.home.pointerCursor.name;
+              size = config.home.pointerCursor.size;
             };
           };
 

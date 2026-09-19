@@ -53,6 +53,9 @@
 
       # security / networking
       <lossilk/hacking>
+      # 只取 agent 半边 (ssh-agent + GitHub over 443 经 clash 代理)。
+      # server 半边是 host 级服务, 仅 headless-vm 显式引 networking._.ssh._.server。
+      <lossilk/networking/ssh/agent>
       <lossilk/security/sops>
       <lossilk/security/bitwarden>
     ];

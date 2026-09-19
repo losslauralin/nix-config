@@ -17,6 +17,16 @@
       };
 
       environment.systemPackages = [pkgs.kdePackages.fcitx5-configtool];
+
+      # NixOS 的 fcitx5 模块只把 Qt6 插件目录写进 QT_PLUGIN_PATH
+      # (nixos/modules/i18n/input-method/fcitx5.nix), 于是 Qt5 程序找不到
+      # fcitx5-qt5 的 platforminputcontext 插件; 自带 Qt5 的闭源程序 (腾讯会议)
+      # 尤其明显 —— 它的 wrapper 会把 QT_PLUGIN_PATH 前缀成自己 bundle 的插件目录,
+      # 只能靠继承值补上插件。列表类型的 environment.variables 在模块系统里按
+      # 拼接合并, 所以这里追加一项不会覆盖模块写入的 Qt6 目录。
+      environment.variables.QT_PLUGIN_PATH = [
+        "${pkgs.libsForQt5.fcitx5-qt}/${pkgs.libsForQt5.qtbase.qtPluginPrefix}"
+      ];
     };
 
     homeManager = {

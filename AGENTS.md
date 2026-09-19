@@ -55,4 +55,4 @@ Direct OK: `modules/*`, `scripts/*`, `*.md`.
 ## Pitfalls
 
 - New `modules/**/*.nix` files must be **`git add`ed** before evaluation; **import-tree** only scans git-tracked files.
-- Skills for concrete workflows: `.agents/skills/add-aspect`, `.agents/skills/pkgs-by-name-package`.
+- Skills for concrete workflows: `.agents/skills/add-aspect`, `.agents/skills/pkgs-by-name-package`, `.agents/skills/noctalia-terminal-theming`.

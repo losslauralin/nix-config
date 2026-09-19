@@ -1,4 +1,4 @@
-# lossilk.desktop._.apps._.wemeet —— 腾讯会议 (Linux 客户端)。
+# lossilk.desktop._.social._.wemeet —— 腾讯会议 (Linux 客户端)。
 #
 # nixpkgs 的 `wemeet` 已经带上游修复补丁:
 #   - libwemeetwrap          (把 sink 伪装成硬件 sink, 避免播不出声)
@@ -19,7 +19,7 @@
 # 如果原生 Wayland 下仍无法输入中文, 用 `wemeet-xwayland` 兜底 —— X11 走 XIM
 # (本机 fcitx5 的 X Input Method Frontend 已启用, steam 等原生 XWayland 程序即走这条)。
 _: {
-  lossilk.desktop._.apps._.wemeet.homeManager = {pkgs, ...}: {
+  lossilk.desktop._.social._.wemeet.homeManager = {pkgs, ...}: {
     home.packages = [pkgs.wemeet];
   };
 }

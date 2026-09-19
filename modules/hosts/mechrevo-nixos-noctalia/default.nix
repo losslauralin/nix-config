@@ -30,9 +30,10 @@
       desktop._.umbriel-noctalia-desktop
       ai._.axonhub._.local
       desktop._.gui
-      desktop._.apps._.qq
-      desktop._.apps._.wemeet
-      desktop._.apps._.wechat
+      desktop._.social._.qq
+      desktop._.social._.telegram
+      desktop._.social._.wemeet
+      desktop._.social._.wechat
       desktop._.localsend
       gaming._.max
       security._.sops

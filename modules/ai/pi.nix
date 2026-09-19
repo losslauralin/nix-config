@@ -1,19 +1,8 @@
 {inputs, ...}: {
-  lossilk.ai._.pi.homeManager = {
-    pkgs,
-    config,
-    ...
-  }: let
-    piAgentConfigDir = "${config.home.homeDirectory}/nix-config/dotfiles/.pi";
-  in {
+  lossilk.ai._.pi.homeManager = {pkgs, ...}: {
     home.packages = [
       inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
       pkgs.nodejs
     ];
-
-    home.file.".pi/agent" = {
-      source = config.lib.file.mkOutOfStoreSymlink piAgentConfigDir;
-      force = true;
-    };
   };
 }

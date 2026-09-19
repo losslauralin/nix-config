@@ -12,7 +12,17 @@
     programs.ssh = {
       enable = true;
 
+      # HM 的 programs.ssh 有一组隐式默认值 (ForwardAgent=false,
+      # AddKeysToAgent=no, ServerAliveInterval=0 等), 未来会被移除并改为报错。
+      # 下面 settings."*" 已逐条显式写出这些键 (其中 AddKeysToAgent 与
+      # ServerAliveInterval 是本仓库有意改的值), 所以关掉隐式默认值行为不变,
+      # 只是消掉迁移警告。
+      enableDefaultConfig = false;
+
       # `netcat` 走显式 store 引用, 不依赖系统 PATH 里恰好存在的 nc。
+      # 注意: 上面的 "*" 块要覆盖 HM 隐式默认值列表里的全部键, 否则关闭
+      # enableDefaultConfig 后那些键会退回 OpenSSH 内建默认 (例如
+      # AddKeysToAgent 默认 no, 会让 ssh-agent 失效)。
       settings = {
         # 全局默认。HM 从 legacy matchBlocks 迁移过来的默认值把
         # AddKeysToAgent/ForwardAgent 设为 no, 会让上面的 ssh-agent 白开;

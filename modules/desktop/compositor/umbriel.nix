@@ -34,6 +34,14 @@ _: {
     }: let
       tomlFormat = pkgs.formats.toml {};
 
+      # Catppuccin Cursors 把每个配色拆成一个单独 output (outputsToInstall = []),
+      # 所以必须取具体 output, 不能直接用 pkgs.catppuccin-cursors (那个只有 dummy out)。
+      # 目录名由 package.nix 生成: 输出名 "latteMauve" -> 驼峰前插连字符再小写
+      # -> catppuccin-latte-mauve-cursors。
+      cursorTheme = "catppuccin-latte-mauve-cursors";
+      cursorPackage = pkgs.catppuccin-cursors.latteMauve;
+      cursorSize = 32; # 逻辑像素; 188ppi 的屏上 32 已经明显大于默认 24
+
       # 240.0 -> "240" (Umbriel mode 串不需要小数尾巴), 59.94 -> "59.94"
       fmtRefresh = value: lib.removeSuffix ".0" (builtins.toJSON value);
 
@@ -62,6 +70,15 @@ _: {
       };
 
       config = {
+        # 光标主题包 + 环境变量。Umbriel 的 [input.cursor] 只管自己的指针, XWayland /
+        # GTK / Qt 客户端 (微信, wemeet-xwayland) 不读那个配置, 只认 XCURSOR_THEME
+        # 和 XCURSOR_SIZE —— 两边都要设, 否则合成器内光标与应用内光标大小/样式不一致。
+        home.packages = [cursorPackage];
+        home.sessionVariables = {
+          XCURSOR_THEME = cursorTheme;
+          XCURSOR_SIZE = toString cursorSize;
+        };
+
         programs.umbriel.settings = {
           general = {
             xwayland = true; # 需要 xwayland-satellite 在 PATH
@@ -79,10 +96,17 @@ _: {
               natural_scroll = true;
             };
             mouse.accel_profile = "flat";
-            # 逻辑像素; Umbriel 会按 output scale 重新加载光标 (1.25x),
-            # 并把它 setenv 给 XCURSOR_SIZE 供客户端使用。默认 24 在这个
-            # 189ppi 的屏上偏小, 这里按 2 倍取 48。
-            cursor.size = 48;
+
+            # 光标主题。之前这里只有 size、没有 theme, 而系统里也没有任何光标
+            # 主题 (Papirus 是图标主题, 不含指针), 环境里的 XCURSOR_THEME 也是空的
+            # → Umbriel 只能回落到内建兜底光标, 那个又小又糊, 调多大都难看。
+            #
+            # size 是逻辑像素, 不乘 output scale (官方 examples/config.toml:
+            # "Logical size, 1-512"), 默认 24 在这个高密度屏上偏小, 取 32。
+            cursor = {
+              theme = cursorTheme;
+              size = cursorSize;
+            };
           };
 
           layout = {

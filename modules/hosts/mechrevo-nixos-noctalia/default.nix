@@ -30,6 +30,7 @@
       desktop._.umbriel-noctalia-desktop
       ai._.axonhub._.local
       desktop._.gui
+      desktop._.apps._.obsidian
       desktop._.social._.qq
       desktop._.social._.telegram
       desktop._.social._.wemeet

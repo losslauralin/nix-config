@@ -21,6 +21,26 @@ Local namespace: **`lossilk`** (`modules/den/default.nix`).
 - After Nix / Den wiring changes: **`just check`**.
 - Dev shell: `nix develop`.
 
+### Never run interactive or privileged commands from an agent session
+
+Agent sessions have no tty. Anything that prompts — for a password, a
+confirmation, a pager, or a selection — will hang or fail, and a failed
+activation can leave the machine mid-switch.
+
+- Do **not** run `just os-switch` (or `nh os switch` / `nixos-rebuild switch`).
+  It calls `sudo` and cannot authenticate without a tty. Hand the command to
+  the user to run in their own terminal instead.
+- Do **not** run `sudo` directly, and do not try to work around the prompt
+  (`sudo -S` with a piped password, `--ask`, an askpass helper, `script`/`expect`).
+- Any other command that may prompt is the user's to run. Verify with
+  read-only commands and evaluation only.
+- Builds and checks are fine when they do not activate: `just check`, `just
+  os-build`, `nix build`. Prefer those — they catch the same class of errors
+  before anything touches the live system.
+
+If a change needs activation to take effect, say so and stop. The user runs
+`just os-switch` in their own terminal; the agent waits for the result.
+
 ## Editing Boundaries
 
 Confirm before modifying: `flake.nix`, `flake.lock`, `pkgs/*`.

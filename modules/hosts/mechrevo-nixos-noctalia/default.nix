@@ -43,6 +43,7 @@
       system._.peripherals._.bluetooth # 真机蓝牙外设支持
       system._.power-mgmt # 笔记本电源模式 / thermal / upower
       networking._.clash-verge # Clash Verge Rev GUI: TUN 走 root 特权服务 (非 setuid)
+      networking._.tailscale # tailnet 组网: 远程访问 + exit node
     ];
 
     nixos = _: {

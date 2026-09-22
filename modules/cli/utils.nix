@@ -22,6 +22,7 @@
       pkgs.rsync # 增量文件同步
       pkgs.sd # sed 替代，直观的查找替换
       pkgs.wget # HTTP 下载
+      pkgs.wl-clipboard # Wayland 剪贴板命令行 (wl-copy/wl-paste)
     ];
 
     programs = {

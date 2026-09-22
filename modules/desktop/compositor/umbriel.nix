@@ -102,6 +102,10 @@ _: {
             touchpad = {
               tap = true;
               natural_scroll = true;
+              # 插上外接鼠标就自动禁用触摸板, 拔掉自动恢复 (libinput 自己检测)。
+              # Umbriel 没有 "enabled" 开关、Noctalia 也没有输入设备 GUI, 所以
+              # 这是唯一的自动开关途径; 仅 native session 有效 (nested 无 libinput)。
+              disable_on_external_mouse = true;
             };
             mouse.accel_profile = "flat";
 

@@ -15,6 +15,10 @@
   # (compositor outputs / gaming Display）会拿到空值。
   den.hosts.x86_64-linux.mechrevo-nixos-noctalia = {
     users.loss = {};
+    # 本机外置音乐库的挂载点 (fact): 音乐只增不减, 不跟 LUKS 里的系统盘抢快照。
+    # 只有真机有这块盘, 所以只写在这台的 spec; 别的 host 不写, 消费者 (lossilk.music)
+    # 读到缺失就退回本地 ~/Music。
+    storage.music = "/mnt/win_d/Music";
     displays.eDP-1 = {
       primary = true;
       refresh = 240.0;

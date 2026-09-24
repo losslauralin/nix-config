@@ -33,7 +33,7 @@ The user runs this, not you. `--cookies-from-browser` reaches into the browser
 profile and can block on a keyring prompt, and an agent session has no tty.
 
 ```fish
-yt-dlp -f 30280 -x --audio-format best --embed-metadata --embed-thumbnail \
+yt-dlp -f bestaudio -x --audio-format best --embed-metadata --embed-thumbnail \
   --cookies-from-browser chrome "<URL>"
 ```
 
@@ -42,13 +42,15 @@ Why each flag:
 - `--audio-format best` is required. `~/.config/yt-dlp/config` sets
   `--audio-format opus` globally, and command-line options layer on top of the
   config rather than replacing it. Without `best`, every download is re-encoded
-  from the source AAC to Opus, which is lossy-onto-lossy. `best` keeps the
-  container the site served.
-- `-f 30280` selects Bilibili's highest audio-only stream. Confirm it with
-  `yt-dlp -F <URL>` first; other sites use other ids, and `-f bestaudio` is the
-  portable choice.
-- Bilibili's "Hi-Res 无损" titles are marketing. `30280` is 151k AAC, and that
-  is the ceiling. Do not promise the user better audio than this.
+  from whatever the site served to Opus, which is lossy-onto-lossy. `best`
+  keeps the container as served.
+- `-f bestaudio` picks the highest audio-only stream on any site, so the same
+  command works for Bilibili, YouTube, and Bandcamp. `--cookies-from-browser`
+  and `--embed-thumbnail` are likewise portable; drop the cookies flag for
+  sites that do not need a login.
+- Do not promise lossless audio. Sites label uploads "Hi-Res 无损" as a
+  marketing line, and even the top audio-only stream is compressed. State the
+  bitrate you actually got instead.
 
 ## Step 2 — Read the file, do not trust the title
 
@@ -59,8 +61,8 @@ exiftool -s -Title -Artist -Album -AlbumArtist -Track -Date -Genre <file>
 ```
 
 Downloaded titles are SEO strings: `「Hi-Res音质」刘森《妖风过海》无损音质经典歌曲完整版`.
-The uploader is frequently credited as the artist, and Bilibili keyword tags
-land in `Genre`.
+The uploader is frequently credited as the artist, and site keyword tags land
+in `Genre`.
 
 ## Step 3 — Settle the album question
 
@@ -208,7 +210,7 @@ exists, usually because someone moved the file by hand. Remove the entry with
 `beet remove -f '<query>'` (without `-d`, so the file is left alone) and
 re-import.
 
-**Genre from a download is not genre.** Bilibili tags are SEO keywords. The
+**Genre from a download is not genre.** Video-site tags are SEO keywords. The
 user has chosen to keep them as-is; do not clear `Genre` on your own, but do
 mention the value when reporting, since it is what the player will show.
 

@@ -47,38 +47,18 @@ Confirm before modifying: `flake.nix`, `flake.lock`, `pkgs/*`.
 
 Direct OK: `modules/*`, `scripts/*`, `*.md`.
 
-### Stop when the work is unrelated to the current workspace
+### Keep unrelated work out of the diff
 
 The working tree usually holds the user's own in-flight edits. Do not pile
-unrelated work on top of it.
-
-Stop and ask the user to open a new herdr worktree when the task is **not
-about** the changes already in the tree — for example a separate feature,
-fix, or experiment that the current dirty files do not depend on.
-
-Say so before editing anything, and name the reason: the work is unrelated to
-what is already in this workspace. Point at the keybind, not a command line —
-the user drives herdr from its TUI, and herdr creates the worktree, opens it
-as a workspace, and focuses it in one step.
-
-```
-This task is unrelated to what is already in this workspace. It belongs in a
-new herdr worktree — press `prefix+shift+g` (new worktree), then re-run the
-request there.
-```
-
-Continue in the current workspace only when:
-
-- The task is a direct follow-up to the edits already present, or
-- The user explicitly says to work in this workspace anyway.
+unrelated work on top of it, and do not treat the dirty tree as a to-do list:
+never report, review, or comment on files outside the requested scope.
 
 Scope every commit with explicit paths, never `git add -A` / `git add .`, so a
-neighbouring uncommitted change cannot be swept in. Never report, review, or
-comment on files outside the requested scope; the dirty tree is not a to-do
-list.
+neighbouring uncommitted change cannot be swept in.
 
-`just os-switch` works from a worktree (recipes resolve against `$PWD`), but
-update `flake.lock` only in the main checkout, or the branches will conflict.
+If the user wants isolation, they drive it — the agent does not require a
+worktree and does not send the user off to create one. Update `flake.lock`
+only in the main checkout, or branches will conflict.
 
 ## Placement (this repo)
 

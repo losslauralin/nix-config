@@ -33,6 +33,7 @@
     includes = with lossilk; [
       desktop._.umbriel-noctalia-desktop
       ai._.axonhub._.local
+      ai._.codex-desktop # Codex 桌面版: GUI 应用, 只上有桌面的机器
       desktop._.gui
       desktop._.apps._.obsidian
       desktop._.social._.qq

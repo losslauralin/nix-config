@@ -72,6 +72,12 @@
       inputs.blueprint.inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     };
+    # OpenAI 只发布 macOS 的 Codex/ChatGPT 桌面版; 该 flake 复用其二进制并
+    # 为 Linux/NixOS 打补丁。上游 bot 自动刷新版本与 hash, 内含专有软件。
+    codex-desktop-linux = {
+      url = "github:ilysenko/codex-desktop-linux";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     zen-browser = {
       url = "github:0xc000022070/zen-browser-flake";

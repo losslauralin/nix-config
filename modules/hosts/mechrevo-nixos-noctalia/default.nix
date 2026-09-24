@@ -36,6 +36,7 @@
       ai._.codex-desktop # Codex 桌面版: GUI 应用, 只上有桌面的机器
       desktop._.gui
       desktop._.apps._.bottles # Wine prefix 管理器: 用户会话 GUI 应用
+      desktop._.apps._.file-manager # GUI 文件管理器 (Nautilus): 真机有 GUI + udisks2
       desktop._.apps._.obsidian
       desktop._.social._.qq
       desktop._.social._.telegram

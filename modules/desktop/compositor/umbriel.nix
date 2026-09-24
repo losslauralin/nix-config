@@ -172,6 +172,7 @@ _: {
             # spawn: 具体命令来自 leaf 切面的 home.sessionVariables, compositor 只消费 seam
             "Mod+Return" = "spawn:${config.home.sessionVariables.TERMINAL}";
             "Mod+B" = "spawn:${config.home.sessionVariables.BROWSER}";
+            "Mod+P" = "spawn:${config.home.sessionVariables.FILE_MANAGER}";
 
             # 窗口状态
             "Mod+Q" = "window-close";

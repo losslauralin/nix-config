@@ -12,6 +12,10 @@
 .claude/settings.local.json
 .claude/memory/
 .claude/plans/
+# `skills add` mirrors .agents/skills into .claude/skills as symlinks.
+# The real skills live in .agents/skills and are edited in place here,
+# so this mirror is derived state, not a second source of truth.
+.claude/skills/
 .cunzhi-memory/
 .spec-workflow/
 .trellis/
@@ -45,3 +49,7 @@ docs/den/
 # Pix Agent
 .pi/
 .pi-lens/
+
+# `skills` CLI install manifest. This repo's skills are authored and edited
+# in place, not synced from upstream, so the manifest tracks nothing useful.
+skills-lock.json

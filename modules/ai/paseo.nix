@@ -38,9 +38,13 @@
         # dataDir 默认值按 `user != "paseo"` 推导成 ~/.paseo, 留空即用默认。
         # 监听地址保持上游默认 (127.0.0.1:6767): 本机自用, 不开防火墙。
         #
-        # relay: 默认 true (走上游 app.paseo.sh 中继) 用于手机配对。
-        # 纯本机使用不需要它; 关掉可少一个出站依赖。要手机连就改成 true。
-        relay.enable = false;
+        # relay: 走上游 app.paseo.sh 中继, 手机配对/绑定设备走的就是它。
+        # 必须是启动期配置: 上游 module 据此生成 daemon 的启动覆盖
+        # (PASEO_RELAY_ENABLED / relay flag), 优先级高于运行时配置。
+        # 设成 false 会让客户端的"启用中继"开关报 handler_error
+        # (Relay is controlled by a daemon launch override) —— 关掉就等于
+        # 放弃中继配对, 纯本机使用才这么做。
+        relay.enable = true;
       };
     };
   };

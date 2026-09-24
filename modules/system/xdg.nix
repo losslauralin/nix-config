@@ -44,7 +44,13 @@
         OCTAVE_HISTFILE = "${config.xdg.cacheHome}/octave-hsts";
         OCTAVE_SITE_INITFILE = "${config.xdg.configHome}/octave/octaverc";
         STACK_ROOT = "${config.xdg.dataHome}/stack";
-        PI_CODING_AGENT_DIR = "${config.xdg.configHome}/pi/agent";
+        # Pi 的 agent 目录**故意不归置**: 保持上游默认的 ~/.pi/agent。
+        # 曾经这里设过 PI_CODING_AGENT_DIR = ~/.config/pi/agent, 但那是
+        # home.sessionVariables —— 只进登录会话, 不进 systemd 系统服务。
+        # Paseo daemon 拉起的 pi 子进程拿不到它, 就回退到默认目录, 于是
+        # 读不到这里的 auth.json (axonhub key), 扩展静默不注册 provider,
+        # 界面里 custom models 全部消失。skills 同理: 文档规定
+        # <agent-dir>/skills/, 归置后就和实际读取位置对不上。
         PYTHON_HISTORY = "${config.xdg.configHome}/python/history";
         WINEPREFIX = "${config.xdg.dataHome}/wine";
         XCOMPOSECACHE = "${config.xdg.cacheHome}/X11/xcompose";

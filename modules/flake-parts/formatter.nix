@@ -41,6 +41,12 @@
         excludes = [
           "*.md"
           "LICENSE"
+          # Vendored third-party skills (e.g. Anthropic's skill-creator) are
+          # upstream artifacts, not repo source. Running ruff/deadnix over them
+          # would rewrite code we do not own and break the content hash that
+          # skills-lock.json records for reproducible reinstall. Same reason
+          # *.md and LICENSE are excluded.
+          ".agents/skills/**"
           ".pi-dev-output/**"
           ".ralph/**"
           "secrets/**"

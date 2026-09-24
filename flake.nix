@@ -72,10 +72,13 @@
       inputs.blueprint.inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     };
-    # OpenAI 只发布 macOS 的 Codex/ChatGPT 桌面版; 该 flake 复用其二进制并
-    # 为 Linux/NixOS 打补丁。上游 bot 自动刷新版本与 hash, 内含专有软件。
-    codex-desktop-linux = {
-      url = "github:ilysenko/codex-desktop-linux";
+    # Paseo: daemon + 客户端的自托管 AI coding agent 界面。上游 flake 的
+    # nixpkgs 不 follow 的话会引入第二份 nixpkgs (体积翻倍 + Electron/系统库
+    # 版本可能分叉), 所以照 umbriel 的写法统一 follows。
+    # 注意: 因为它构建自源码 (buildNpmPackage), 换了 nixpkgs 后上游的
+    # nix/npm-deps.hash 未必匹配 —— 见 modules/ai/paseo.nix 的 npmDepsHash。
+    paseo = {
+      url = "github:getpaseo/paseo";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -15,7 +15,8 @@
       desktop._.umbriel-noctalia-desktop
       virt._.vm
       ai._.axonhub._.local
-      ai._.codex-desktop # Codex 桌面版: GUI 应用, 只上有桌面的机器
+      ai._.paseo-daemon # Paseo daemon: host 级常驻服务, 跑在 loss 用户下
+      ai._.paseo # Paseo 桌面客户端: GUI 应用, 只上有桌面的机器
       desktop._.gui
       desktop._.apps._.file-manager # GUI 文件管理器 (Nautilus)
       desktop._.localsend

@@ -41,7 +41,7 @@ _: {
       # 这里**故意不设** xdg.mimeApps(默认关联) —— 两个原因:
       #
       # 1. `~/.config/mimeapps.list` 是运行时状态, 不是声明式配置。GTK 应用
-      #    (codex-desktop, clash-verge, telegram, thunderbird 等) 每次启动
+      #    (paseo-desktop, clash-verge, telegram, thunderbird 等) 每次启动
       #    都会重写整个文件来抢占自己的协议关联, 条目跨应用累积。
       #    这正是本仓库对 aghub / obsidian 用的同一条规矩: 应用自己维护的
       #    运行时状态交给应用, 用 Nix 生成会跟它打架。

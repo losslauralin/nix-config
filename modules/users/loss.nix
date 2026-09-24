@@ -48,8 +48,9 @@
       <lossilk/dev/editors/zed> # Zed GUI 编辑器
 
       # AI 辅助工具
-      # 这里只放 CLI。codex-desktop 是 GUI 应用, 由有桌面的 host 显式 include:
-      # 放进 user 主切面的话, den.batteries.host-aspects 会把它带到 headless VM 上。
+      # 这里只放 CLI。paseo 的 GUI 客户端由有桌面的 host 显式 include (见
+      # ai._.paseo / ai._.paseo-daemon): 放进 user 主切面的话,
+      # den.batteries.host-aspects 会把它带到 headless VM 上。
       <lossilk/ai/pi>
       <lossilk/ai/codex> # Codex CLI (OpenAI 官方编码 agent)
       <lossilk/ai/claude-code> # Claude Code CLI (Anthropic 官方编码 agent)

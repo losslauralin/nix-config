@@ -90,6 +90,30 @@
       boot.loader.efi.canTouchEfiVariables = true;
       zramSwap.enable = true;
 
+      # WebKitGTK + NVIDIA 专有驱动在 Wayland 下的既有缺陷 (tauri-apps/tauri#9394,
+      # 官方文档 https://v2.tauri.app/develop/debug/linux-graphics/ 收录):
+      # WebKitGTK 的 DMA-BUF 渲染器会向 NVIDIA 驱动要它不提供的 buffer 格式,
+      # 导致 Tauri 应用启动即崩:
+      #   Gdk-Message: Error 71 (协议错误) dispatching to Wayland display.
+      #
+      # 官方四级缓解措施里, 这是第 2 级 —— 关掉 explicit sync 后 NVIDIA 回退到
+      # implicit sync, 官方说法是 "often fixes the Wayland Error 71 crash without
+      # a performance cost", 即**保留硬件加速**。本机已实测: 单加这个变量就不再
+      # 崩溃 (完整跑完, 后端 200 OK, 前端 JS 执行)。
+      #
+      # 为什么不一起加第 3 级 WEBKIT_DISABLE_DMABUF_RENDERER=1:
+      # 那一级是第 2 级不管用时才用的, 代价是关掉一条更快的渲染路径。本机这个
+      # 变量从未被隔离验证过 —— 当时它和别的变量混在一起测, 而真正让 GLib
+      # CRITICAL / 白屏消失的是 GStreamer 插件 (见 desktop/platform/gstreamer.nix,
+      # 那才是白屏的真因)。所以这里不加, 除非将来实测证明非加不可。
+      #
+      # 为什么写在这里 (host 而非 aghub 的切面): "这台机器有 NVIDIA" 是机器事实。
+      # 同一个 aghub 包也装在 VM host 上, VM 没有 NVIDIA, 无条件给包加变量
+      # 会让它白白降级渲染。这里也不写 `if host.gpu == ...`: host spec 只写值。
+      environment.sessionVariables = {
+        __NV_DISABLE_EXPLICIT_SYNC = "1";
+      };
+
       # Windows NTFS 数据盘 (nvme1n1p1, label 数据): 绝不分区/格式化 → 不进 disko;
       # 开机 rw 挂到 /mnt/win_d. nofail: 盘不在也不阻塞开机.
       # 注意: Windows 侧保持快速启动/休眠关闭, 否则脏卷会让 ntfs3 降级只读挂载.

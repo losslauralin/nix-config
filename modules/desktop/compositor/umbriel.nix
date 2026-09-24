@@ -3,24 +3,61 @@
 # "The Noctalia Family" 第二件: 独立 Wayland compositor (wlroots/C++23):
 # scrolling / dwindle / master 布局, per-output workspace, blur / shadow / 圆角 / 动画.
 #
-# 与 shell 解耦: 本切面只放 compositor 基线与通用配置。Noctalia 专属的 autostart /
-# IPC keybinds / window_rule / layer_rule 属于路线级协调, 由 glue aspect 补
-# (见 lossilk.desktop._.umbriel-noctalia-desktop)。
+# 包与 NixOS 接线来自上游 flake 的 nixosModules (inputs.umbriel):
+#   - 装包 + services.displayManager.sessionPackages (greeter 才能发现 session)
+#   - systemd.packages / systemd.user.services.umbriel
+#   - xdg.portal 接入 xdg-desktop-portal-umbriel + wayland-session 基座
+#     (enableXWayland=false, xwayland 由 Umbriel 自己拉 xwayland-satellite)
+#   - 它会 disabledModules 掉 nixpkgs 的 programs/wayland/umbriel.nix, 避免两份定义冲突
 #
-# NixOS 侧走 nixpkgs 原生 `programs.umbriel`:
-#   - 装包 + `services.displayManager.sessionPackages` (greeter 才能发现 Umbriel session)
-#   - `xdg.portal` 接入 xdg-desktop-portal-umbriel + wayland-session 基座
-#   - xwayland 由 Umbriel 自己拉起 `xwayland-satellite` (故 wayland-session enableXWayland=false)
+# ---------------------------------------------------------------------------
+# 配置机制 (关键, 别改成"写全"的形式)
+# ---------------------------------------------------------------------------
+# Umbriel 按顺序查找 "首个存在的文件生效", 不会与包内那份合并:
+#   1. $XDG_CONFIG_HOME/umbriel/config.toml   ← HM 生成的那份
+#   2. $XDG_CONFIG_DIRS/umbriel/config.toml
+#   3. share/umbriel/config.toml              ← 包内, = 上游 examples/config.toml
 #
-# Home Manager 侧 nixpkgs/HM 都没有 umbriel 模块, 因此本切面声明
-# `programs.umbriel.settings` 并生成 `~/.config/umbriel/config.toml` (TOML, 热重载)。
-# 注意 Umbriel 的配置查找是"首个存在的文件生效", 不会合并包内默认值
-# (PACKAGING.md "Configuration lookup"), 所以基线在这里写全; 未列出的键走内建默认。
+# 所以只要 (1) 存在, (3) 就被整块跳过 —— 除非 (1) 自己用 `[include]` 把 (3)
+# 拉进来。这里就是这么做的:
 #
-# 输出配置复用 den.schema.host.displays (host spec 仍然是显示器事实的唯一来源)。
-_: {
+#   [include].files = [ <包内那份的 store 路径> ]
+#
+# 合并语义 (上游 configuration 文档):
+#   - include 的文件先应用, 主文件最后应用
+#   - 表按 key 合并; [[window_rule]] / [[layer_rule]] 之类规则列表**累积**
+#   - 普通数组和标量**被主文件替换**
+#
+# 因此这里只写必须覆盖的几项, 其余 (appearance / input / layout / animation /
+# window_rule / layer_rule / colors …) 一律继承包内那份。
+# 上游更新 examples 时自动跟进, 不需要维护副本。
+#
+# ---------------------------------------------------------------------------
+# 键位与「内建默认表」(加键前必读)
+# ---------------------------------------------------------------------------
+# examples/config.toml 里那句 "Defining this table replaces the built-in bind set"
+# 是过时的注释。实际实现 (src/config/config.cpp):
+#
+#   loaded.keybinds = defaultKeybinds();          // 先装内建表
+#   ...readKeybinds() 里按 chord 逐条:            // 再按 chord 覆盖
+#     erase_if(loaded.keybinds, sameChord(...));
+#     loaded.keybinds.push_back(binding);
+#
+# 内建表 (src/config/keybind_parse.cpp: defaultKeybinds()) 从不被清空, 只被
+# **同名 chord** 顶掉。所以真正生效的键位 = 内建表 ∪ examples ∪ 本文件。
+# 内建表里有 examples 没列出、但一直能用的一批, 例如:
+#   Mod+H/J/K/L 焦点 · Mod+Shift+H/J/K/L 移动列/窗口 · Mod+Shift+方向
+#   Mod+Comma/Period 吞并 · Mod+O 概览 · Mod+1..9 与 Mod+KP_1..9 工作区
+#   Mod+Shift+1..9 移动 · Mod+Wheel* 焦点
+# 判断某个 chord 是否空闲时, 必须两者都查, 只看 examples 会漏。
+#
+# 内建/examples 都没有 preset 的常用动作: window-swap-next / -previous
+# (action 存在但没绑), 由本文件补上。
+{inputs, ...}: {
   lossilk.desktop._.compositor._.umbriel = {
     nixos = {pkgs, ...}: {
+      imports = [inputs.umbriel.nixosModules.default];
+
       programs.umbriel.enable = true;
       environment.systemPackages = [pkgs.xwayland-satellite];
     };
@@ -32,16 +69,9 @@ _: {
       host,
       ...
     }: let
-      tomlFormat = pkgs.formats.toml {};
-
-      # phinger-cursors 里的 light/dark 说的是**指针自己**的颜色, 不是桌面配色:
-      # 本路线是 Catppuccin latte 浅色桌面, 所以取 dark (黑指针 + 白描边),
-      # 取 light 会得到白指针, 在浅背景上基本看不见。
-      # 它也是少数在 24/32/48/64/96/128 上都按原生网格绘制的主题, 所以下面的
-      # cursorSize = 32 是原生尺寸, 不会像缩放出来的光标那样发糊。
-      cursorTheme = "phinger-cursors-dark";
-      cursorPackage = pkgs.phinger-cursors;
-      cursorSize = 32; # 逻辑像素; 188ppi 的屏上 32 已经明显大于默认 24
+      # 包内那份配置 (= 该 commit 的 examples/config.toml), 作为 include 基线。
+      # 只引用 store 路径字符串, 不读文件内容。
+      baselineConfig = "${inputs.umbriel.packages.${pkgs.stdenv.hostPlatform.system}.default}/share/umbriel/config.toml";
 
       # 240.0 -> "240" (Umbriel mode 串不需要小数尾巴), 59.94 -> "59.94"
       fmtRefresh = value: lib.removeSuffix ".0" (builtins.toJSON value);
@@ -59,172 +89,173 @@ _: {
           else "always";
       };
     in {
-      # HM 没有 umbriel 模块 → 这里建立 settings 接口, 其它切面 (shell / glue) 可以继续
-      # 往同一个 attrset 里写键; TOML 值类型在模块系统里按 attrset 深合并、list 拼接。
-      options.programs.umbriel.settings = lib.mkOption {
-        type = with lib.types; nullOr (oneOf [tomlFormat.type str path]);
-        default = null;
-        description = ''
-          Umbriel 配置, 写入 {file}`$XDG_CONFIG_HOME/umbriel/config.toml`。
-          null 时不生成用户配置, 回落到包内默认配置。
-        '';
+      imports = [inputs.umbriel.homeModules.default];
+
+      # 上游 HM 模块的 config 段是 `lib.mkIf cfg.enable` —— 不打开就不会
+      # 生成 config.toml, 也不会装包。NixOS 侧已经装过同一个包, 这里只是
+      # 让模块的 xdg.configFile 接线生效。
+      programs.umbriel.enable = true;
+
+      # 光标。包内默认 `input.cursor.theme = ""` 传给 wlroots 的是 nullptr:
+      #   wlr_xcursor_manager_create(nullptr, size)
+      #   → wlr_xcursor_theme_load(NULL, size) 里 `if (!name) name = "default";`
+      #   → xcursor_load_theme("default", ...) 读 ~/.icons/default/index.theme
+      # HM 的 home.pointerCursor 正好生成那个文件 (内容 Inherits=<name>)。
+      #
+      # phinger-cursors 的 light/dark 说的是**指针自己**的颜色, 不是桌面配色:
+      # 本路线是 Catppuccin latte 浅色桌面, 所以取 dark (黑指针 + 白描边),
+      # 取 light 会得到白指针, 在浅背景上基本看不见。
+      home.pointerCursor = {
+        enable = true;
+        name = "phinger-cursors-dark";
+        package = pkgs.phinger-cursors;
+        size = 32;
+        gtk.enable = true;
       };
 
-      config = {
-        # 光标主题包 + 环境。Umbriel 的 [input.cursor] 只管自己的指针, XWayland /
-        # GTK / Qt 客户端 (微信, wemeet-xwayland) 不读那个配置, 只认 XCURSOR_THEME
-        # 和 XCURSOR_SIZE —— 两边都要设, 否则合成器内光标与应用内光标大小/样式不一致。
-        #
-        # 这两件事交给 HM 的 home.pointerCursor 统一处理: 它会装包、写
-        # XCURSOR_THEME / XCURSOR_SIZE, 并同步 GTK 的 gtk-cursor-theme-name/-size
-        # 与 ~/.icons/default —— 比手写环境变量更全。下面的 [input.cursor] 读同一份
-        # 值, 保证合成器内与应用内始终一致。
-        home.pointerCursor = {
-          enable = true; # 不显式打开的话 HM 会报 deprecation warning
-          name = cursorTheme;
-          package = cursorPackage;
-          size = cursorSize;
-          gtk.enable = true;
-        };
+      programs.umbriel.settings = {
+        # 基线: 包内那份 examples/config.toml。下面各项覆盖它。
+        include.files = [baselineConfig];
 
-        programs.umbriel.settings = {
-          general = {
-            xwayland = true; # 需要 xwayland-satellite 在 PATH
-            show_cheatsheet = false;
-            focus_on_activate = false;
-          };
+        # 包内 examples 的 `autostart = []`, 不会拉起 shell —— 没有 Noctalia
+        # 就没有 bar / 壁纸 / launcher, 屏幕上只有空 workspace 的背景色。
+        general.autostart = ["noctalia"];
 
-          input = {
-            keyboard = {
-              layout = "us";
-              numlock_toggle = true;
-            };
-            touchpad = {
-              tap = true;
-              natural_scroll = true;
-              # 插上外接鼠标就自动禁用触摸板, 拔掉自动恢复 (libinput 自己检测)。
-              # Umbriel 没有 "enabled" 开关、Noctalia 也没有输入设备 GUI, 所以
-              # 这是唯一的自动开关途径; 仅 native session 有效 (nested 无 libinput)。
-              disable_on_external_mouse = true;
-            };
-            mouse.accel_profile = "flat";
+        # 显示器事实来自 host spec (den.schema.host.displays)。
+        # 包内那份不写 output ("Outputs are machine-specific"), 不覆盖的话
+        # Umbriel 自动选 preferred 模式 —— 那是 60Hz + scale 1, 不是本机要的。
+        output =
+          if host.displays == {}
+          then {}
+          else lib.mapAttrs mkOutput host.displays;
 
-            # 光标主题。之前这里只有 size、没有 theme, 而系统里也没有任何光标
-            # 主题 (Papirus 是图标主题, 不含指针), 环境里的 XCURSOR_THEME 也是空的
-            # → Umbriel 只能回落到内建兜底光标, 那个又小又糊, 调多大都难看。
-            #
-            # size 是逻辑像素, 不乘 output scale (官方 examples/config.toml:
-            # "Logical size, 1-512"), 默认 24 在这个高密度屏上偏小, 取 32。
-            # 值来自 home.pointerCursor, 与 XCURSOR_* / GTK 侧同源。
-            cursor = {
-              theme = config.home.pointerCursor.name;
-              size = config.home.pointerCursor.size;
-            };
-          };
-
-          layout = {
-            mode = "scrolling";
-            gap = 8;
-          };
-
-          # 外观基线; Noctalia 官方 Umbriel 指南推荐的圆角/边框/blur 组合。
-          appearance = {
-            prefer_no_csd = true;
-            border_width = 2;
-            corner_radius = 10;
-            blur = {
-              enabled = true;
-              optimized = true;
-              passes = 3;
-              radius = 3;
-              noise = 0.02;
-              brightness = 0.9;
-              contrast = 0.9;
-              saturation = 1.1;
-            };
-          };
-
-          # 无选择器的全窗口 blur 规则必须排在最前, 后面的匹配规则才能覆盖单项设置。
-          window_rule = [
-            {
-              blur = true;
-              blur_optimized = false;
-            }
-          ];
-
-          output =
-            if host.displays == {}
-            then {}
-            else lib.mapAttrs mkOutput host.displays;
-
-          # 通用 compositor 键位 (沿用仓库原有键位习惯, 避开 shell 占用的键)。
-          # shell 侧键位 (Noctalia IPC) 由 glue aspect 追加。
-          keybinds = {
-            # 会话 / 概览 / 帮助
-            "Mod+Escape" = "session-quit";
-            "Ctrl+Alt+Delete" = "session-quit";
-            "Mod+W" = "overview-toggle";
-            "Mod+O" = {
-              action = "cheatsheet-toggle";
+        # 表按 chord 合并, 所以这里只列需要覆盖/新增的键。
+        keybinds =
+          {
+            # 包内 examples 绑的是 kitty, 本机终端是 foot (见 glue 的 TERMINAL)。
+            "Mod+Return" = {
+              action = "spawn:${config.home.sessionVariables.TERMINAL}";
               repeat = false;
             };
 
-            # spawn: 具体命令来自 leaf 切面的 home.sessionVariables, compositor 只消费 seam
-            "Mod+Return" = "spawn:${config.home.sessionVariables.TERMINAL}";
-            "Mod+B" = "spawn:${config.home.sessionVariables.BROWSER}";
-            "Mod+P" = "spawn:${config.home.sessionVariables.FILE_MANAGER}";
-
-            # 窗口状态
-            "Mod+Q" = "window-close";
-            "Mod+T" = "window-toggle-floating";
-            "Mod+G" = "window-focus-switch-floating";
-            "Mod+F" = "window-toggle-maximize";
-            "Mod+Shift+F" = "window-toggle-fullscreen";
+            # --- 仓库惯例 (沿用 niri 时代的键位; 只补内建/examples 都没有的) ------
             "Mod+C" = "column-center";
-            "Mod+R" = "window-cycle-width";
-            "Mod+E" = "window-cycle-width-back";
 
-            # 焦点 (vim)
-            "Mod+H" = "window-focus-left";
-            "Mod+J" = "window-focus-down";
-            "Mod+K" = "window-focus-up";
-            "Mod+L" = "window-focus-right";
+            # 交换窗口 (layout order 内的 swap; scrolling 布局下是同一列内换位)。
+            # 上游没 preset —— 见文件头「内建默认表」一节。
+            "Mod+Shift+Comma" = {
+              action = "window-swap-previous";
+              repeat = false;
+            };
+            "Mod+Shift+Period" = {
+              action = "window-swap-next";
+              repeat = false;
+            };
 
-            # 移动窗口 / 列
-            "Mod+Shift+H" = "column-move-left";
-            "Mod+Shift+J" = "window-move-down";
-            "Mod+Shift+K" = "window-move-up";
-            "Mod+Shift+L" = "column-move-right";
+            # 退出。内建只有 Mod+Escape 一条, 这里补回 Ctrl+Alt+Delete。
+            "Ctrl+Alt+Delete" = {
+              action = "session-quit";
+              repeat = false;
+            };
 
-            # 滚轮切焦点
-            "Mod+WheelDown" = "window-focus-right";
-            "Mod+WheelUp" = "window-focus-left";
+            # --- Noctalia shell IPC (上游 examples 一条都没绑) --------------------
+            # 面板 id 以 `noctalia msg panel-open <错 id>` 的报错列表为准:
+            # clipboard, control-center, launcher, polkit, session, setup-wizard,
+            # test, tray-drawer, wallpaper.
+            "Mod+S" = {
+              action = "spawn:noctalia msg panel-toggle control-center";
+              repeat = false;
+            };
+            "Mod+V" = {
+              action = "spawn:noctalia msg panel-toggle clipboard";
+              repeat = false;
+            };
+            "Mod+X" = {
+              action = "spawn:noctalia msg panel-toggle session";
+              repeat = false;
+            };
+            # 内建的概览键是 Mod+O; Mod+W 是仓库惯例的别名。
+            "Mod+W" = {
+              action = "overview-toggle";
+              repeat = false;
+            };
+            # niri 时代专门给 shell 留的键 (见 35f94b2 里的避让注释)。
+            "Mod+Shift+S" = {
+              action = "spawn:noctalia msg settings-toggle";
+              repeat = false;
+            };
+            "Mod+Alt+L" = {
+              action = "spawn:noctalia msg session lock";
+              repeat = false;
+            };
 
-            # 工作区 1-9: 切换 / 移入
-            "Mod+1" = "workspace-switch:1";
-            "Mod+2" = "workspace-switch:2";
-            "Mod+3" = "workspace-switch:3";
-            "Mod+4" = "workspace-switch:4";
-            "Mod+5" = "workspace-switch:5";
-            "Mod+6" = "workspace-switch:6";
-            "Mod+7" = "workspace-switch:7";
-            "Mod+8" = "workspace-switch:8";
-            "Mod+9" = "workspace-switch:9";
-            "Mod+Shift+1" = "window-move-to-workspace:1";
-            "Mod+Shift+2" = "window-move-to-workspace:2";
-            "Mod+Shift+3" = "window-move-to-workspace:3";
-            "Mod+Shift+4" = "window-move-to-workspace:4";
-            "Mod+Shift+5" = "window-move-to-workspace:5";
-            "Mod+Shift+6" = "window-move-to-workspace:6";
-            "Mod+Shift+7" = "window-move-to-workspace:7";
-            "Mod+Shift+8" = "window-move-to-workspace:8";
-            "Mod+Shift+9" = "window-move-to-workspace:9";
+            # 截图走 Noctalia (自带选区/标注), 不装 grim/slurp。
+            "Print" = {
+              action = "spawn:noctalia msg screenshot-region";
+              repeat = false;
+            };
+            "Shift+Print" = {
+              action = "spawn:noctalia msg screenshot-fullscreen";
+              repeat = false;
+            };
+
+            # --- 音量 / 亮度 / 媒体键 --------------------------------------------
+            # 走 Noctalia IPC 而不是文档示例里的 wpctl/brightnessctl/playerctl:
+            # 本机只装了 wpctl, 而且 Noctalia 会顺带画 OSD。
+            # allow_when_locked: 锁屏下仍要能调音量/亮度 (上游 keybinds 文档推荐)。
+            "XF86AudioRaiseVolume" = {
+              action = "spawn:noctalia msg volume-up";
+              allow_when_locked = true;
+            };
+            "XF86AudioLowerVolume" = {
+              action = "spawn:noctalia msg volume-down";
+              allow_when_locked = true;
+            };
+            "XF86AudioMute" = {
+              action = "spawn:noctalia msg volume-mute";
+              allow_when_locked = true;
+            };
+            "XF86AudioMicMute" = {
+              action = "spawn:noctalia msg mic-mute";
+              allow_when_locked = true;
+            };
+            "XF86MonBrightnessUp" = {
+              action = "spawn:noctalia msg brightness-up";
+              allow_when_locked = true;
+            };
+            "XF86MonBrightnessDown" = {
+              action = "spawn:noctalia msg brightness-down";
+              allow_when_locked = true;
+            };
+            "XF86AudioPlay" = {
+              action = "spawn:noctalia msg media toggle";
+              repeat = false;
+            };
+            "XF86AudioNext" = {
+              action = "spawn:noctalia msg media next";
+              repeat = false;
+            };
+            "XF86AudioPrev" = {
+              action = "spawn:noctalia msg media previous";
+              repeat = false;
+            };
+          }
+          # 浏览器 / 文件管理器是路线侧可选的可执行 seam (BROWSER 由 glue 导出,
+          # FILE_MANAGER 由 file-manager 切面导出)。seam 缺失时**不绑键**,
+          # 而不是让 compositor 切面的求值失败。
+          // lib.optionalAttrs (config.home.sessionVariables ? BROWSER) {
+            "Mod+B" = {
+              action = "spawn:${config.home.sessionVariables.BROWSER}";
+              repeat = false;
+            };
+          }
+          // lib.optionalAttrs (config.home.sessionVariables ? FILE_MANAGER) {
+            # 上游 Mod+P 是 window-toggle-pinned, 所以文件管理器换到 Mod+E。
+            "Mod+E" = {
+              action = "spawn:${config.home.sessionVariables.FILE_MANAGER}";
+              repeat = false;
+            };
           };
-        };
-
-        xdg.configFile."umbriel/config.toml" = lib.mkIf (config.programs.umbriel.settings != null) {
-          source = tomlFormat.generate "umbriel-config.toml" config.programs.umbriel.settings;
-        };
       };
     };
   };

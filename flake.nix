@@ -98,6 +98,15 @@
       inputs.flake-parts.follows = "flake-parts";
     };
 
+    # Umbriel compositor。nixpkgs 里的版本钉在旧 commit 上 (且 nixpkgs 的
+    # programs.umbriel 模块缺 systemd/portal 接线), 所以直接引上游 flake:
+    # 拿到最新源码 + 官方 nixosModules (会 disabledModules 掉 nixpkgs 的同名模块)。
+    # follows 让上游共用本 flake 的 nixpkgs —— 只保留一份, 且与系统其余部分一致。
+    umbriel = {
+      url = "github:noctalia-dev/umbriel";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     make-shell.url = "github:nicknovitski/make-shell";
     deploy-rs = {
       url = "github:serokell/deploy-rs";

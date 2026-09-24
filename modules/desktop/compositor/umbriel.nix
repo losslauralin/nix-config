@@ -141,6 +141,21 @@
             # --- 仓库惯例 (沿用 niri 时代的键位; 只补内建/examples 都没有的) ------
             "Mod+C" = "column-center";
 
+            # 全屏 / 全宽 互换。内建表与 examples 都是:
+            #   Mod+F       = window-toggle-fullscreen (真·全屏)
+            #   Mod+Ctrl+F  = window-toggle-maximize   (占满整列宽度)
+            # 本仓库想要反过来: 单手 Mod+F 走常用的「占满宽度」, 全屏挪到
+            # Mod+Ctrl+F。两条都要显式写 —— 只写一条只会顶掉一个 chord,
+            # 另一条仍是内建的那个动作, 交换就只做了一半。
+            "Mod+F" = {
+              action = "window-toggle-maximize";
+              repeat = false;
+            };
+            "Mod+Ctrl+F" = {
+              action = "window-toggle-fullscreen";
+              repeat = false;
+            };
+
             # 交换窗口 (layout order 内的 swap; scrolling 布局下是同一列内换位)。
             # 上游没 preset —— 见文件头「内建默认表」一节。
             "Mod+Shift+Comma" = {

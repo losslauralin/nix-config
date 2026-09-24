@@ -17,6 +17,9 @@
   dbus,
   cairo,
   gdk-pixbuf,
+  # Not linked against: only its compiled GSettings schemas, which the wrapper
+  # puts on XDG_DATA_DIRS (see postFixup).
+  gsettings-desktop-schemas,
 }:
 stdenv.mkDerivation (finalAttrs: {
   pname = "aghub";
@@ -101,10 +104,40 @@ stdenv.mkDerivation (finalAttrs: {
   # 用 --suffix 而非 --set: 会话里已有 GIO_EXTRA_MODULES (dconf 的 modules 目录),
   # --set 会把它挤掉。GIO 会合并该变量里的所有目录, 顺序不影响谁能胜出
   # (gnutls 优先级 0, dummy 是 -100)。
+  #
+  # XDG_DATA_DIRS: GTK 3 and WebKitGTK do not read the desktop's font, DPI or
+  # scaling settings from anywhere else -- they come from GSettings, and the
+  # schemas live in gtk3 (org.gtk.Settings.*) and gsettings-desktop-schemas
+  # (org.gnome.desktop.interface). NixOS only puts *system profile* packages'
+  # schemas on XDG_DATA_DIRS (as $out/share/gsettings-schemas/<name>), so a
+  # store package that runs GTK without adding its own schema directories
+  # silently falls back to compiled-in defaults.
+  #
+  # Documented symptom of exactly that (see the cc-switch NixOS packaging,
+  # github.com/HYBB-rash/cc-switch-nix-webkitgtk-fix, same Tauri + WebKitGTK
+  # shape): the whole UI renders too small, the top of the window is cut off
+  # and most of the window stays blank. Measured on aghub 1.9.1 here: the
+  # sidebar is `w-60` (240px) in the app's own CSS but rendered ~160px wide,
+  # i.e. the CSS root font size had fallen to ~10.6px instead of 16px -- so
+  # every rem-based size in the app shrank by a third. Reproduced regardless
+  # of the window size, and it is the classic NixOS "Tauri app looks tiny" bug
+  # rather than anything aghub does wrong.
+  #
+  # --prefix, not --set: the session's own XDG_DATA_DIRS (system profile, user
+  # profile, flatpak exports) must stay reachable. Schema lookup merges every
+  # directory, so order does not decide who wins.
   postFixup = ''
+    # The two schema directories are addressed as <pkg>/share/gsettings-schemas/<name>
+    # (the layout glib's setup hook installs). Check them here instead of trusting
+    # the path: a stale layout would leave the wrapper pointing at nothing and the
+    # fix below would silently do nothing.
+    test -d ${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}/glib-2.0/schemas
+    test -d ${gtk3}/share/gsettings-schemas/${gtk3.name}/glib-2.0/schemas
+
     wrapProgram $out/bin/aghub \
       --prefix PATH : $out/bin \
-      --suffix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules
+      --suffix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules \
+      --prefix XDG_DATA_DIRS : ${gsettings-desktop-schemas}/share/gsettings-schemas/${gsettings-desktop-schemas.name}:${gtk3}/share/gsettings-schemas/${gtk3.name}
   '';
 
   passthru = {

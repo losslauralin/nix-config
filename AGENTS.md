@@ -105,6 +105,27 @@ update `flake.lock` only in the main checkout, or the branches will conflict.
 - Prefer **host includes capability + user `host-aspects`** over double-including the same mixed aspect on both host and user.
 - Classify by **scope + privilege + which eval root must see it**, not by “whether a fancy `services.*` option exists”. Pure user tools often only need `homeManager` / `home.packages`.
 
+## Host Specs And Capabilities
+
+- A host spec declares **facts**; a capability **aspect** owns behaviour. Never hard-bind one to the other.
+- Machine facts — disk paths, mount points, device nodes, hardware quirks — must not appear in `modules/**` capability aspects: not as defaults, not inside wrapper scripts, not even in comments. The aspect knows its own contract (e.g. `~/Music`), never the machine.
+- Host specs write values only. If a host file contains an `if`, an activation, or glue for one named capability, that logic is in the wrong layer.
+- Facts go on the entity as free-form host metadata: `den.hosts.<system>.<host>.<fact> = …`. `den.schema.host.<fact> = value` is **not** “this host” — den defines `den.schema.<kind>` as base modules holding *shared meta-data between all hosts*.
+- A capability reads facts through the injected `host` context and keeps its own default (`host.storage.music or null`). Fact absent ⇒ no wiring, not an error.
+- Two checks before writing either side: remove the capability from the host’s `includes` — does the host file still stand alone? Remove the host’s fact — does the aspect still have a sane default?
+- Wrapping a package (`writeShellScriptBin`) to inject a machine path is a smell: the path belongs in another layer.
+
+## Verification Order
+
+Cheapest authoritative source first; source code last.
+
+1. **Docs and option metadata**: den docs, `nh search options` / `nh search packages`, upstream README and man pages. If these answer, stop here.
+2. **Ask the user** when the question is about intent, preference, or a local fact they already hold.
+3. **Probes**, isolated only: `nix eval`, or a copy/scratch directory. A probe answers an unanswered factual question; it is not a debugging loop, and it must never be the first resort for something documentation already states.
+4. **Upstream source** (`*.go`, `*.vala`, Nix modules) only when nothing above answers — reading source is expensive and easy to misread.
+
+- Never run a build-time-interpolated script inside the real home directory. `HOME=…` does not isolate a path that Nix expanded at build time, and running it *is* a change to the user’s machine (evaluate with a substituted `homeDirectory`, or work in a copy).
+
 ## Pitfalls
 
 - New `modules/**/*.nix` files must be **`git add`ed** before evaluation; **import-tree** only scans git-tracked files.

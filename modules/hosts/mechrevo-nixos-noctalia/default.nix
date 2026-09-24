@@ -112,30 +112,21 @@
       # 同一个 aghub 包也装在 VM host 上, VM 没有 NVIDIA, 无条件给包加变量
       # 会让它白白降级渲染。这里也不写 `if host.gpu == ...`: host spec 只写值。
       #
-      # 上面那一级 (implicit sync) 之后还有一类崩溃它拦不住: WebKitGTK 的 Skia GPU 绘制
-      # 线程在 NVIDIA 专有驱动里段错误, 渲染进程死在 "画到一半", 窗口就停在残帧上。
-      # 实测 (coredumpctl, WebKitGTK 2.52.6 + 595.99.02):
-      #   WebKitWebProcess SIGSEGV, TID "SkiaGPUWorker"
-      #     #0 libnvidia-eglcore.so.595.99.02
-      #     #1 GrGLTexture::onRelease <- GrResourceCache::releaseAll <- ~GrDirectContext
-      #     #6 WTF::ThreadSafeWeakPtrControlBlock::strongDeref<WebCore::SkiaGLContext>
-      #     #7 __call_tls_dtors (线程退出时析构 GL context)
-      # aghub 的「模型设置」弹窗正是这样被吞掉的: 它带 backdrop-blur, 走的恰好是 Skia 的
-      # 加速滤镜 / ImageBuffer 路径, 于是弹窗只画出一小块就被崩掉的帧冻住。
-      #
-      # 2.52 分支源码 Source/WebCore/platform/graphics/skia/SkiaPaintingEngine.cpp 写明:
-      # "If WEBKIT_SKIA_ENABLE_CPU_RENDERING=1 is set, we will allocate a CPU-only worker
-      # pool" —— 即不再创建 SkiaGPUWorker, 崩掉的那个线程根本不存在。
-      # WebKit 的 environment-variables 文档也点明: 只设 WEBKIT_SKIA_GPU_PAINTING_THREADS=0
-      # 仍可能把 GPU 用在加速滤镜 (accelerated ImageBuffer) 上, 只有这个变量才禁用 GPU 渲染。
-      # 不用 Tauri 官方梯子第 4 级 WEBKIT_DISABLE_COMPOSITING_MODE=1 (整体关掉加速合成),
-      # 那是这台机器上更贵的一级。
-      #
-      # 代价: 本机所有 WebKitGTK 应用改为用 CPU 绘制 tile (滚动/合成本身仍走 GPU)。
-      # NVIDIA 驱动修掉这个析构期崩溃后, 删掉这一行即可回到 GPU 绘制。
+      # 曾经这里还叠过 WEBKIT_SKIA_ENABLE_CPU_RENDERING=1, 理由是 SkiaGPUWorker
+      # 线程在 libnvidia-eglcore 析构期段错误 (WebKitWebProcess SIGSEGV,
+      # GrDirectContextD1Ev <- SkiaGLContext strongDeref <- __call_tls_dtors)。
+      # 已实测隔离: 那个崩溃的**真正触发条件是关掉上面这个 implicit sync**,
+      # 不是缺 CPU 渲染。三层对照 (同一 aghub, 复现「模型设置」弹窗):
+      #   保留 L2 + 保留 CPU_RENDERING -> 正常 (旧配置)
+      #   保留 L2 + 去掉 CPU_RENDERING -> 正常  <- 证明 CPU_RENDERING 冗余
+      #   去掉 L2 + 去掉 CPU_RENDERING -> SIGSEGV, 栈与上面记录一致
+      # 即: 只要 __NV_DISABLE_EXPLICIT_SYNC=1 在, SkiaGPUWorker 就不会踩到那个
+      # 析构路径, 无需放弃 GPU 绘制。曾把该崩溃误判为独立缺陷, 是因为当时它和
+      # 缺 GSettings schema (见 pkgs/by-name/aghub: 缩放错乱, 会放大异常渲染路径)
+      # 混在一起观察。故**不再**设 CPU_RENDERING, 保留硬件加速。
+      # 若将来 NVIDIA 修掉 explicit sync 下的这个崩溃, 可再删掉这一行回到完全默认。
       environment.sessionVariables = {
         __NV_DISABLE_EXPLICIT_SYNC = "1";
-        WEBKIT_SKIA_ENABLE_CPU_RENDERING = "1";
       };
 
       # Windows NTFS 数据盘 (nvme1n1p1, label 数据): 绝不分区/格式化 → 不进 disko;

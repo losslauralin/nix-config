@@ -13,6 +13,7 @@
   webkitgtk_4_1,
   libsoup_3,
   glib,
+  glib-networking,
   dbus,
   cairo,
   gdk-pixbuf,
@@ -44,6 +45,7 @@ stdenv.mkDerivation (finalAttrs: {
     webkitgtk_4_1
     libsoup_3
     glib
+    glib-networking
     dbus
     cairo
     gdk-pixbuf
@@ -85,8 +87,24 @@ stdenv.mkDerivation (finalAttrs: {
   # Both binaries already land in the same $out/bin, so the lookup succeeds
   # once $out/bin is on PATH; make it explicit for the desktop-entry launch
   # path, which starts from a bare session environment.
+  #
+  # GIO_EXTRA_MODULES: WebKitGTK 通过 GIO 发网络请求, 而 NixOS 默认不提供
+  # glib-networking, 于是 GIO 的 TLS 后端退化成 GDummyTlsBackend
+  # (supports_tls = false), **任何 HTTPS 请求都发不出去**。表现是应用能开、
+  # 文字和布局正常, 但所有远程图片/图标静默不渲染 —— "Resources" 面板里
+  # 那些 agent 图标就是这样丢的。同时缺的还有 gnome / libproxy 两个
+  # proxy-resolver 扩展, 所以系统代理对 WebKit 也不可见。
+  #
+  # 这是 NixOS 侧的已知问题 (NixOS/nixpkgs#367378), 解法就是补 glib-networking;
+  # 该 issue 里 "images and icons are not displayed" 的症状与本包一致。
+  #
+  # 用 --suffix 而非 --set: 会话里已有 GIO_EXTRA_MODULES (dconf 的 modules 目录),
+  # --set 会把它挤掉。GIO 会合并该变量里的所有目录, 顺序不影响谁能胜出
+  # (gnutls 优先级 0, dummy 是 -100)。
   postFixup = ''
-    wrapProgram $out/bin/aghub --prefix PATH : $out/bin
+    wrapProgram $out/bin/aghub \
+      --prefix PATH : $out/bin \
+      --suffix GIO_EXTRA_MODULES : ${glib-networking}/lib/gio/modules
   '';
 
   passthru = {
@@ -108,7 +126,9 @@ stdenv.mkDerivation (finalAttrs: {
       source: the Tauri v2 + Rust + bun build is a large custom toolchain and
       upstream publishes no Nix expression. The .deb's bundled binaries are
       kept as-is; only the ELF interpreter and library rpaths are rewritten so
-      they resolve against this system's WebKitGTK/GTK/OpenSSL.
+      they resolve against this system's WebKitGTK/GTK/OpenSSL, and the wrapper
+      supplies GIO_EXTRA_MODULES (glib-networking) that NixOS does not put on
+      GIO's search path by default.
     '';
     homepage = "https://github.com/AkaraChen/aghub";
     downloadPage = "https://github.com/AkaraChen/aghub/releases";

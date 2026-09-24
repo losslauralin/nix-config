@@ -35,6 +35,7 @@
       ai._.axonhub._.local
       ai._.codex-desktop # Codex 桌面版: GUI 应用, 只上有桌面的机器
       desktop._.gui
+      desktop._.platform._.gstreamer # WebKitGTK 媒体 element: 缺了会让 Tauri 应用白屏/卡加载
       desktop._.apps._.bottles # Wine prefix 管理器: 用户会话 GUI 应用
       desktop._.apps._.aghub # AI coding agent 统一配置中心 (Tauri GUI)
       desktop._.apps._.file-manager # GUI 文件管理器 (Nautilus): 真机有 GUI + udisks2

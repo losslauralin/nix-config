@@ -25,7 +25,6 @@
       <lossilk/cli/atuin> # shell history
       <lossilk/cli/utils> # coreutils 替代 + 杂项
       <lossilk/cli/fzf> # 模糊搜索
-      <lossilk/cli/yazi> # TUI 文件管理器
       <lossilk/cli/zoxide> # 智能 cd
 
       # dev (nixpkgs: development/)

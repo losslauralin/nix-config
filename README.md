@@ -74,7 +74,7 @@ CI runs the full `nix flake check`. It cannot use `--no-build` because the catpp
 |------|-----|
 | `den.default` = framework defaults only | `stateVersion`, `allowUnfree`, and the `define-user`/`hostname` pipeline. No desktop route, no app bundle; `host-aspects` is user opt-in. |
 | Glue aspects are explicit | Hosts include supported route glue directly, for example `lossilk.desktop._.umbriel-noctalia-desktop`. This is still an ordinary Den aspect, not a separate primitive. |
-| One concern per aspect, unless it is genuinely tiny | Coreutils replacements (`bat`/`eza`/`fd`/`ripgrep`) live together in `cli/utils.nix`; configured tools (`fzf`/`yazi`/`zoxide`) get their own file. |
+| One concern per aspect, unless it is genuinely tiny | Coreutils replacements (`bat`/`eza`/`fd`/`ripgrep`) live together in `cli/utils.nix`; configured tools (`fzf`/`zoxide`) get their own file. |
 | Cross-platform → user aspect; host-locked → host aspect | Shell tools go in `lossilk.cli._.*`, platform configs in `lossilk.virt`, hardware specs inline in host `nixos` block. |
 
 ### Batteries used

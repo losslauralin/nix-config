@@ -6,11 +6,17 @@ description: Commit message conventions for this nix-config. Use when staging or
 # Commit Conventions
 
 This repo uses a lightweight Conventional Commits style. Follow it for new
-commits; do not rewrite existing history. Write in English. No tooling enforces
-this — it is a habit, not a gate.
+commits; do not rewrite existing history. Write in English.
 
 The style below is what the repo already uses. Pick type and scope by the
 intent of the change, not by the file path.
+
+Pre-commit runs a `treefmt` hook over the staged files (see
+`modules/flake-parts/git-hooks.nix`), and it will reject your commit when it
+finds something to fix. That hook is a gate, so a rejected commit means the
+tree needs attention -- see [When a commit is rejected](#when-a-commit-is-rejected).
+Read the hook config itself when it matters; this skill describes the
+conventions, not the current state of the tooling.
 
 ## Types
 
@@ -66,21 +72,43 @@ invent scopes that do not map to a real shelf, route, or entity.
 
 2. Decide the commit split.
 
-   One commit = one intent. Separate unrelated changes (e.g. a config fix and a
-   docs/skill addition) into distinct commits. Check recent style with
+   One commit carries one intent. When the tree holds a config fix and a
+   docs addition, that is two commits, not one. Check recent style with
    `git log --oneline -10` before writing.
 
-   Completion: the number of commits and the files in each are fixed. A mixed
-   "config + docs" change is split, not bundled.
+   A commit that grew past its intent is hard to review and hard to revert:
+   reverting it drags the unrelated change out with it. The test is whether
+   the commit can be described in one subject line without an "and".
+
+   Completion: you can name each commit's intent in one sentence, and know
+   which files belong to each.
 
 3. Stage exactly the files for this commit.
 
-   Use explicit paths: `git add <file> ...`. Do not stage unrelated work, and do
-   not use `git add -A` / `git add .` when the tree has other changes. New
-   `modules/**/*.nix` files must be staged before any evaluation (import-tree
-   only scans tracked files).
+   Use explicit paths: `git add <file> ...`. When the tree holds other changes,
+   leave them out of the index.
 
-   Completion: `git status --short` shows only the intended files as staged.
+   A new `modules/**/*.nix` file has to be tracked before anything that
+   evaluates the flake will see it. `flake.nix` builds this repo's module tree
+   with `import-tree ./modules`, which walks git-tracked files only, so an
+   untracked module is not an error -- it is simply absent. `just check` and
+   `just build` will pass while the aspect or host file you just wrote
+   contributes nothing. Track the file in the same breath as creating it, and
+   confirm with `git status --short` that it shows as `A` rather than `??`.
+
+   The same silence applies to Den wiring: an aspect only takes effect through
+   an `includes` entry. A staged, committed aspect file that no host or user
+   `includes` is inert, and evaluation stays green. When the commit adds or
+   renames an aspect, check that the include site moves with it.
+
+   A previously failed attempt leaves its staged files in the index, and the
+   next `git add` adds to that pile rather than starting over. Before staging,
+   run `git status --short` and confirm the index matches this commit's file
+   list; `git reset` clears it when it does not.
+
+   Completion: `git status --short` shows only the intended files as staged,
+   every new `modules/**/*.nix` file reads `A`, and any new aspect has its
+   `includes` entry in the same commit.
 
 4. Write the message.
 
@@ -97,6 +125,33 @@ invent scopes that do not map to a real shelf, route, or entity.
 
    Completion: the new commit appears with the intended message, and the
    working tree is clean or only holds intentionally uncommitted work.
+
+## When a commit is rejected
+
+The `treefmt` hook rejects a commit by rewriting the files it can format and
+failing on the ones it cannot. Work out which of the two happened before
+touching anything, because the responses differ:
+
+- **The hook rewrote files.** Those rewrites are the fix. Re-stage them and
+  commit again.
+- **The hook reports a formatter it cannot apply.** That means the file and the
+  formatter disagree about what this repo should look like. Decide whether the
+  file needs editing or the formatter needs excluding, and change the one that
+  is actually wrong.
+
+A formatter pointed at vendored third-party code is the common case: lint rules
+written for this repo's own sources will find fault with code the repo does not
+own, and rewriting it silently diverges from upstream. Vendored directories are
+excluded from the formatter instead -- and because the hook passes an explicit
+file list, the exclusion has to be set both in `formatter.nix` (for a
+directory walk) and in `git-hooks.nix` (for the staged-file list). When a
+commit is rejected, read the hook's output rather than assuming it is wrong.
+
+`--no-verify` skips the check for one commit. It is warranted when the commit
+itself is the change that makes the hook pass -- a formatter or hook config fix
+that the hook cannot yet see, because the hook reads the committed config. Reach
+for it only there, and say why in the commit body, so the next reader does not
+read it as a routine bypass.
 
 ## Good examples (from this repo)
 
@@ -121,8 +176,8 @@ name under the greeter shelf.
 - Sentence-style with no type: `Add fcitx5 rime wanxiang input aspect`.
 - Missing space after the colon: `docs:update desc`.
 - Vague fillers: `fixup`, `update stuff`.
-- Restating the diff: `fix: change line 42 to true`.
-- Bundling unrelated changes into one commit.
+- Subjects that restate the diff: `fix: change line 42 to true`.
+- Commits holding two intents, which the subject line cannot honestly describe.
 
 ## Stop Rules
 
@@ -131,7 +186,7 @@ name under the greeter shelf.
 - Do not introduce commitlint, a commit-msg hook, or any enforcement tooling
   unless the user explicitly asks; that would touch `flake.nix`/`pkgs` and needs
   confirmation.
-- If you are about to bundle two unrelated changes because they are "close
-  enough", stop and split them instead.
+- If two unrelated changes are tempting to bundle because they are "close
+  enough", split them instead.
 - If a commit needs `flake.nix`, `flake.lock`, or `pkgs/*`, get explicit
   confirmation before editing those files.

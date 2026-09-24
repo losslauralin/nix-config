@@ -46,26 +46,18 @@
   };
 
   # ---- desktop: GUI 客户端 (HM) -----------------------------------------
+  # 直接用上游 desktop 包, 不要 override 加 Wayland flag。
+  #
+  # 曾经这里用 wrapProgram --add-flags 追加过 --ozone-platform=wayland 等,
+  # 结果是 GUI 完全起不来 (error: unknown option '--ozone-platform=wayland')。
+  # 原因: 上游 launcher 已经把 electron 的 app 路径写死在中间
+  #   exec electron <app-path> --no-sandbox --class=paseo-desktop "$@"
+  # 而 --add-flags 只会把参数拼到整条命令行的**末尾**, 也就是 app 路径之后;
+  # Electron 只解析 app 路径**之前**的 Chromium switch, 之后的全部透传给 app,
+  # app 不认识就报错退出。上游那份不加任何 flag, 本来就是好的。
   lossilk.ai._.paseo.homeManager = {pkgs, ...}: {
     home.packages = [
-      # Wayland 四件套必须走 wrapper 的 --add-flags, 不能用 electron-flags.conf:
-      # 上游 desktop-package.nix 的 makeWrapper 只固定加了 --no-sandbox /
-      # --class=paseo-desktop, 既**不**读 electron-flags.conf, 也不读
-      # NIXOS_OZONE_WL (nixpkgs 的 electron wrapper 也不处理后者)。照搬
-      # codex-desktop 那套配置在这里会被静默忽略。
-      (inputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.desktop.overrideAttrs (old: {
-        nativeBuildInputs = old.nativeBuildInputs or [];
-        postInstall =
-          (old.postInstall or "")
-          + ''
-            # 重新生成 wrapper, 追加 Wayland 相关 flag。
-            wrapProgram $out/bin/paseo-desktop \
-              --add-flags "--ozone-platform=wayland" \
-              --add-flags "--enable-features=WaylandWindowDecorations" \
-              --add-flags "--enable-wayland-ime=true" \
-              --add-flags "--wayland-text-input-version=3"
-          '';
-      }))
+      inputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.desktop
     ];
   };
 }

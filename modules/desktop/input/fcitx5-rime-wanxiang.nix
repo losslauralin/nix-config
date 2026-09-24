@@ -49,31 +49,28 @@
         fi
       '';
 
-      # HM 侧的 fcitx5 模块必须自己开一次: `i18n.inputMethod.enable` 只写在
-      # 上面的 nixos class 模块里, 而 HM 模块的全部 config 都被
-      # `lib.mkIf (im.enable && im.type == "fcitx5")` 包着 —— 不开的话下面
-      # settings 写了也不生成 fcitx5/config, 静默失效。
-      i18n.inputMethod = {
-        enable = true;
-        type = "fcitx5";
-
-        # 触发键只保留 fcitx5 内建的 `Control+space` (还有 Zenkaku_Hankaku / Hangul);
-        # 本机要的是「Mod (Super) 完全不碰 fcitx5」, 所以必须显式清掉那两个用 Super
-        # 的全局键 —— 它们是内建默认, 本文件不写就一直在用:
-        #   EnumerateGroupForwardKeys  = Super+space        (切到下一输入法组)
-        #   EnumerateGroupBackwardKeys = Super+Shift+space
-        # 而 Umbriel 内建键位把 Mod+Space 用作 launcher/概览类动作, 于是同一个 chord
-        # 两个消费者: 按 Mod+Space 既切输入法组, 又触发 compositor 动作。
-        #
-        # 空串 = 清空该列表 (fcitx5 的 list 型选项以 `Key=` 无值表示空, 见上游
-        # globalconfig.cpp 与 fcitx5 自己写出的 config)。不要改成 `[]`: list 不是
-        # pkgs.formats.ini 支持的值类型, 求值会直接 abort。
-        # TriggerKeys 故意不写 —— 保持内建默认的 Control+space, rime 用那个。
-        fcitx5.settings.globalOptions.Hotkey = {
-          EnumerateGroupForwardKeys = "";
-          EnumerateGroupBackwardKeys = "";
-        };
-      };
+      # 触发键只保留 fcitx5 内建的 `Control+space` (还有 Zenkaku_Hankaku / Hangul),
+      # 清掉那两个用 Super 的全局键。它们是内建默认, 不写就一直在用:
+      #   EnumerateGroupForwardKeys  = Super+space        (切到下一输入法组)
+      #   EnumerateGroupBackwardKeys = Super+Shift+space
+      # 而 Umbriel 内建键位把 Mod+Space 用作 launcher/概览类动作, 于是同一个 chord
+      # 两个消费者: 按 Mod+Space 既切输入法组, 又触发 compositor 动作。
+      #
+      # 空串 = 清空该列表 (fcitx5 的 list 型选项以 `Key=` 无值表示空, 见上游
+      # globalconfig.cpp 与 fcitx5 自己写出的 config)。
+      # TriggerKeys 故意不写 —— fcitx5 按 `partial` 部分加载本文件, 没写的键回退到
+      # 内建默认, 所以 Control+space 仍然是 rime 的触发键。
+      #
+      # 不要改成 HM 的 `i18n.inputMethod.fcitx5.settings.globalOptions`: 那会让 HM
+      # 在 `~/.config/fcitx5` 放**整个目录**的 linkFarm, 而该目录是 fcitx5 运行时
+      # 自己写的真实目录 (profile / conf/notifications.conf / cached_layouts),
+      # 激活时报 `Existing file '/home/loss/.config/fcitx5' would be clobbered` 而失败。
+      # 本切面一直按文件管理 fcitx5 配置 (classicui.conf / rime/*), 这里保持一致。
+      xdg.configFile."fcitx5/config".text = ''
+        [Hotkey]
+        EnumerateGroupForwardKeys=
+        EnumerateGroupBackwardKeys=
+      '';
 
       xdg.configFile."fcitx5/conf/classicui.conf".text = ''
         Vertical Candidate List=False

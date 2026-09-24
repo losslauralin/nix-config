@@ -64,7 +64,6 @@
   lossilk.gaming._.max = {
     includes = [
       lossilk.gaming._.min
-      lossilk.gaming._.replays
     ];
 
     nixos = {pkgs, ...}: {
@@ -93,7 +92,6 @@
 
       environment.systemPackages = [
         pkgs.goverlay
-        pkgs.gpu-screen-recorder-gtk
         pkgs.lsfg-vk
         pkgs.lsfg-vk-ui
         pkgs.ludusavi
@@ -103,23 +101,6 @@
         pkgs.r2modman
         pkgs.winetricks
       ];
-    };
-  };
-
-  lossilk.gaming._.replays.homeManager = {
-    lib,
-    pkgs,
-    ...
-  }: {
-    home.packages = [
-      pkgs.gpu-screen-recorder
-    ];
-
-    systemd.user.services.gpu-screen-recorder = {
-      Unit.Description = "gpu-screen-recorder replay service";
-      Install.WantedBy = ["graphical-session.target"];
-      Service.ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p %h/Videos/Replays";
-      Service.ExecStart = "${lib.getExe pkgs.gpu-screen-recorder} -w portal -f 60 -r 60 -k av1 -a 'default_output' -a 'default_input' -c mp4 -q high -o %h/Videos/Replays -restore-portal-session yes -v no";
     };
   };
 }

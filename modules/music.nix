@@ -139,11 +139,16 @@
           singleton: $artist/$title
           comp: Compilations/$album%aunique{}/$track $title
 
-        # fetchart 从 Cover Art Archive 等来源补封面, embedart 把它写进音频文件
-        # (g4music 读的是内嵌封面)。没开 lyrics (g4music 不显示) 和 replaygain
-        # (会改写音频文件)。
-        plugins: fetchart embedart
+        # 数据源挂在 plugins 上, 不是单独开关: musicbrainz 是核心自带的, 只要
+        # autotag 打开就查; 其余每多一个源就多一次命中机会。中文独立与同人发行
+        # 在 MusicBrainz 上几乎没人录, 所以补 deezer —— 它有刘森这类中文曲目,
+        # 且不需要任何凭据。
+        # 不招 mbpseudo: 伪发行候选会排在正式发行前面, 抢掉本该命中的那张专辑,
+        # 结果 album 与 track 字段都是空的, 还得手工补。
+        plugins: fetchart embedart deezer fromfilename
 
+        # fetchart 从 Cover Art Archive 等来源补封面, embedart 把它写进音频文件
+        # (g4music 读的是内嵌封面)。
         fetchart:
           auto: yes
         embedart:

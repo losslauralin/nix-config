@@ -15,7 +15,9 @@
           setSessionVariables = true;
           desktop = null;
           templates = null;
-          music = null;
+          # 显式给出音乐库位置: 留 null 时 XDG_MUSIC_DIR 不存在, `xdg-user-dir MUSIC`
+          # 会退回 $HOME, 音乐播放器就会把整个家目录当成音乐库 (见 modules/music.nix)。
+          music = "${config.home.homeDirectory}/Music";
           publicShare = null;
           projects = "${config.home.homeDirectory}/projects";
         };

@@ -37,6 +37,7 @@
       desktop._.social._.wechat
       desktop._.localsend
       gaming._.max
+      music # 本地音乐库: yt-dlp 下载 + beets 整理 + Gapless 播放
       security._.sops
       system._.boot._.plymouth # 图形启动画面 / quiet boot
       system._.filesystems._.ntfs # Windows 数据盘按需挂载支持

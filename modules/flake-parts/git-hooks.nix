@@ -23,6 +23,17 @@
         treefmt = {
           enable = true;
           # Native integration — already runs in --fail-on-change mode.
+          #
+          # Excludes must be repeated here, not only in formatter.nix: this
+          # hook runs with pass_filenames=true, so pre-commit hands treefmt an
+          # explicit file list. treefmt only applies its own `excludes` when it
+          # walks directories itself — with explicit paths it formats
+          # everything it is given. The generated .pre-commit-config.yaml
+          # `exclude` regex is what actually filters that list.
+          # Keep this in sync with treefmt excludes in formatter.nix.
+          excludes = [
+            "^\\.agents/skills/"
+          ];
         };
       };
     };

@@ -31,7 +31,6 @@
       ];
 
       environment.systemPackages = [
-        pkgs.cartridges
         pkgs.heroic
         pkgs.umu-launcher
       ];

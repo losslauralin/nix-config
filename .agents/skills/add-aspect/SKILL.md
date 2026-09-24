@@ -51,6 +51,15 @@ Add or wire one Den aspect by copying the nearest local pattern. Keep the edit n
 
    Completion: validation passed, or the exact failing command and failure are reported without using `/nix/store/**` as evidence.
 
+## Parallel Work
+
+When another worktree or agent may be editing this repository at the same time, split the work by **file**, not by feature. The test: no two agents may touch the same file.
+
+- A new aspect file is yours alone. Create it and commit it.
+- A host or user include list is a shared registration point. If another agent also needs a line there, the two agents collide. Leave that file to the user.
+
+So in a parallel task, hand over the new aspect file only and say so explicitly. Do not add the include line; the user adds it on `main` once the branches are merged. `default.nix` include lists are the usual shared file.
+
 ## Stop Rules
 
 - If you are about to query `/nix/store/**`, stop immediately, report the attempted action, and wait for user direction.

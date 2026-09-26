@@ -121,6 +121,14 @@
         # 就没有 bar / 壁纸 / launcher, 屏幕上只有空 workspace 的背景色。
         general.autostart = ["noctalia"];
 
+        # 插入外接鼠标后关掉触控板, 拔掉自动恢复 (libinput 自己管这个状态, 不需要
+        # 额外 udev 规则或脚本)。触控板是笔记本硬件, 但键名是 Umbriel 的通用输入选项
+        # 而非机器事实 (无路径/设备名), 所以写在 compositor 切面而不是 host spec。
+        # 只支持原生会话 (嵌套会话里没有 libinput 设备), 本机是 greetd 原生会话。
+        # 其余 [input.touchpad] 项 (tap / natural_scroll / ...) 继续保持包内
+        # examples 的默认, 这里不碰。
+        input.touchpad.disable_on_external_mouse = true;
+
         # 显示器事实来自 host spec (den.schema.host.displays)。
         # 包内那份不写 output ("Outputs are machine-specific"), 不覆盖的话
         # Umbriel 自动选 preferred 模式 —— 那是 60Hz + scale 1, 不是本机要的。
